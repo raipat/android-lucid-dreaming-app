@@ -1,0 +1,709 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Sleep Data Viewer</title>
+    <link href="layout.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../jquery.min.js"></script>   
+    <script language="javascript" type="text/javascript" src="../jquery.flot.min.js"></script>
+     <script language="javascript" type="text/javascript" src="../jquery.flot.pie.min.js"></script>
+      <script language="javascript" type="text/javascript" src="../jquery.flot.symbol.min.js"></script>
+      <script language="javascript" type="text/javascript" src="../jquery.flot.threshold.min.js"></script> 
+    <script language="javascript" type="text/javascript" src="../jquery.flot.selection.min.js"></script>
+ </head>
+ 	<p><span id="title">Sleep history</span></p>
+    <body>
+    <div id="placeholder" style="width:900px;height:450px;"></div>
+     <div style="float:left;width:900px;height:60px;border: 1px dashed gainsboro;" id="legend"></div>
+   
+	<p><span id="message"></span></p>    
+   <div id="choices">Show data for:</div>
+   
+   <div id="placeholder2" style="width:900px;height:450px;"></div>
+   <div style="float:left;width:900px;height:90px;border: 1px dashed gainsboro;" id="legend2"></div>
+    <div id="choices2">Show data for:</div>
+   
+<br/>
+<h3>Sleep History Statistics:</h3>
+
+<table>
+	<tr><td>
+    <div id="graph4" class="graph"></div>
+</td>
+<td> <div id="divider" style="width:20px;height:1px;"></div></td>
+
+<td>
+
+	<table class="statistics" >
+	<tr>
+	<td><h3>Sleep Statistics</h3></td><td><strong>Average</br> per night </strong></td><td><strong>Sum</strong></td>
+	</tr>
+	<tr>
+	<td>Average Going to Sleep Time </td><td><span id="averageGoingToSleepTime"></span></td><td></td>
+	</tr>
+	<tr>
+	<td>Average Awakening Time</td><td><span id="averageWakingUpTime"></span></td><td></td>
+	</tr>
+	<tr>
+	<td>Total Time in Bed</td><td><span id="averageTimeInBed"></span></td><td><span id="totalTimeInBed"></span></td>
+	</tr>
+	<tr>
+	<td>Total Minutes Asleep</td><td><span id="averageMinutesAsleep"></span></td><td><span id="totalMinutesAsleep"></span></td>
+	</tr>
+	<tr>
+	<td>Longest Sleep Episode</td><td><span id="longestSleepEpisode"></span></td><td></td>
+	</tr>
+	<tr>
+	<td>Sleep Onset Latency</td><td><span id="averageSleepOnsetLatency"></span></td><td><span id="sleepOnsetLatency"></span></td>
+	</tr>
+	<tr>
+	<td>Number Of Awakenings</td><td><span id="averageNumberOfAwakenings"></span></td><td><span id="numberOfAwakenings"></span></td>
+	</tr>
+
+	<tr>
+	<td>Number Of User Events</td><td><span id="averageNumberOfUserEvents"></span></td><td><span id="numberOfUserEvents"></span></td>
+	</tr>
+	<tr>
+	<td>Number Of Reminders Played</td><td><span id="averageNumberOfVoiceReminders"></span></td><td><span id="numberOfVoiceReminders"></span></td>
+	</tr>
+	<tr>
+	<td>Number Of Dreams Entered</td><td><span id="averageNumberOfDreams"></span></td><td><span id="numberOfDreams"></span></td>
+	</tr>
+	<tr>
+	<td>Number Of Lucid Dreams</td><td><span id="averageNumberOfLucidDreams"></span></td><td><span id="numberOfLucidDreams"></span></td>
+	</tr>
+	
+	</table>
+
+</td></tr>
+
+</table>
+
+Analysis: <div id="analysis">
+
+
+<script type="text/javascript">
+$(function () {
+
+var temp = window.javahandler.getJson1();
+var json = eval("(" + temp + ")");
+//var json = $.parseJSON(temp);
+//var json = !(/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(temp.replace(/"(\\.|[^\\])*"/g, ''))) && eval('(' + temp + ')');
+
+//var json = !(/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(
+  //           temp.replace(/"(\\.|[^\"\\])*"/g, ''))) &&
+   //      eval('(' + temp + ')');   
+
+
+//var json =jQuery.parseJSON( temp );
+
+//var json = window.JSON.parse(temp);
+
+//if (/^[\],:{}\s]*$/.test(temp.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "@")
+	//.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, "]")
+	//.replace(/(?:^|:|,)(?:\s*\[)+/g, ""))) {
+	// json = eval("(" + temp + ")");}
+	
+
+ var activityCountYMax;
+ if(json.activityCountYMax === undefined){activityCountYMax=2500;}
+ else{
+ activityCountYMax= json.activityCountYMax;
+ }
+ 
+  var sleepScoreYMax;
+ if(json.sleepScoreYMax === undefined){sleepScoreYMax=35;}
+ else{
+ sleepScoreYMax= json.sleepScoreYMax;
+ }
+
+
+   var datasets = {
+        "night1": {
+            label: json.night1Label,
+            data: json.night1,
+              color: 1
+          
+            },        
+        "night2": {
+            label: json.night2Label,
+            data: json.night2,
+              color: 2
+             },
+           "night3": {
+            label: json.night3Label,
+            data: json.night3,
+              color: 3
+           
+            },             
+        "night4": {
+            label: json.night4Label,
+            data: json.night4,
+              color: 4
+           
+            },      
+         
+            "night5": {
+            label: json.night5Label,
+            data: json.night5,
+              color: 5
+            
+            },
+            "night6": {
+            label: json.night6Label,
+            data: json.night6,
+            color: "rgb(51,15,255)"
+            
+            },
+             "night7": {
+            label: json.night7Label,
+            data: json.night7,
+            color: "rgb(255,102,0)",
+            
+            },
+            
+            
+            
+            
+    };
+    
+    //replace this with a loop?
+       var datasets2 = {
+        "night1": {
+            label: json.night1Label,
+            data: json.night1SleepScore,
+             color: 1
+          
+            },        
+       		 "night2": {
+            label: json.night2Label,
+            data: json.night2SleepScore,
+             color: 2
+             },
+           "night3": {
+            label: json.night3Label,
+            data: json.night3SleepScore,
+             color: 3
+           
+            },             
+       		 "night4": {
+            label: json.night4Label,
+            data: json.night4SleepScore,
+            color: 4
+            },      
+         
+            "night5": {
+            label: json.night5Label,
+            data: json.night5SleepScore,
+             color: 5
+            },
+            "night6": {
+            label: json.night6Label,
+            data: json.night6SleepScore,
+            color: "rgb(51,15,255)"
+
+            },
+             "night7": {
+            label: json.night7Label,
+            data: json.night7SleepScore,
+            color: "rgb(255,102,0)",
+            },
+            
+            "sleepCycle1": {
+            label: json.sleepCycle1Label ,
+           // label: "Sleep Cycle 1" ,
+            data: json.sleepCycle1,
+             points: {show: true, radius: 5, symbol: "cross" },
+             // color: "rgb(255,102,0)"
+                yaxis: 2,
+                color: 6
+            },
+             "sleepCycle2": {
+           label: json.sleepCycle2Label ,
+       // label: "Sleep Cycle 2" ,
+            data: json.sleepCycle2,
+             points: {show: true, radius: 5, symbol: "cross" },
+             // color: "rgb(255,102,0)"
+                yaxis: 2,
+                color: 7
+            },
+             "sleepCycle3": {
+           label: json.sleepCycle3Label ,
+       
+            data: json.sleepCycle3,
+             points: {show: true, radius: 5, symbol: "cross" },
+             // color: "rgb(255,102,0)"
+                yaxis: 2,
+                color: 8
+            },
+             "sleepCycle4": {
+          label: json.sleepCycle4Label ,
+       // label: "Sleep Cycle 4" ,
+            data: json.sleepCycle4,
+             points: {show: true, radius: 5, symbol: "cross" },
+             // color: "rgb(255,102,0)"
+                yaxis: 2,
+                color: 9
+            },
+             "sleepCycle5": {
+           label: json.sleepCycle5Label ,
+        // label: "Sleep Cycle 5" ,
+            data: json.sleepCycle5,
+             points: {show: true, radius: 5, symbol: "cross" },
+             // color: "rgb(255,102,0)"
+                yaxis: 2,
+                color: 10
+            },
+             "sleepCycle6": {
+          label: json.sleepCycle6Label ,
+       // label: "Sleep Cycle 6" ,
+            data: json.sleepCycle6,
+             points: {show: true, radius: 5, symbol: "cross" },
+             // color: "rgb(255,102,0)"
+                yaxis: 2,
+                color: "rgb(51,15,255)"
+
+            },
+             "sleepCycle7": {
+            label: json.sleepCycle7Label ,
+        // label: "Sleep Cycle 7" ,
+            data: json.sleepCycle7,
+             points: {show: true, radius: 5, symbol: "cross" },
+             // color: "rgb(255,102,0)"
+                yaxis: 2,
+                color: "rgb(255,102,0)",
+            },
+              "hypnogram": {
+            label: "Hypnogram" ,
+        // label: "Sleep Cycle 7" ,
+            data: json.hypnogram,
+           
+             // color: "rgb(255,102,0)"
+                yaxis: 3,
+               color: "rgb(0,0,0)",
+                
+            },
+            "remGuess": {
+            label: "REM Events" ,
+        // label: "Sleep Cycle 7" ,
+            data: json.remEvents,
+            	points: {show: true, radius: 1},
+             // color: "rgb(255,102,0)"
+                yaxis: 3,
+                color: "rgb(200, 20, 30)",
+                
+            },
+            
+       //       "sleepCycleEnd": {
+       //     label: json.sleepCycleEndLabel,
+        //    data: json.sleepCycleEnd,
+        //     points: {show: true, radius: 3, symbol: "cross" },
+        //     yaxis: 2
+             
+             // color: "rgb(255,102,0)"
+            
+        //    },
+   //             "sleepCycleStart": {
+   //         label: json.sleepCycleStartLabel,
+   //         data: json.sleepCycleStart,
+           //  points: {show: true, radius: 3, symbol: "cross" },
+             // color: "rgb(255,102,0)"
+   //             yaxis: 2
+   //        },
+            
+            
+              "dreams": {
+            label: json.dreamsLabel,
+            data: json.dreams,
+             points: {show: true, radius: 3, symbol: "triangle", },
+             // color: "rgb(255,102,0)"
+               yaxis: 2,
+               color: "rgb(255,102,0)",
+            },
+              "lucidDreams": {
+            label: json.lucidDreamsLabel,
+            data: json.lucidDreams,
+             points: {show: true, radius: 3, symbol: "square" },
+               yaxis: 2,
+               color: 5
+          
+            
+            },
+                "awake": {
+            label: json.awakeLabel,
+            data: json.awake,
+             points: {show: true, radius: 3, symbol: "circle", },
+        	   yaxis: 2,
+        	  color: "rgb(0,0,0)",
+            
+            },
+            
+            
+            
+    };
+    
+  
+
+    // hard-code color indices to prevent them from shifting as
+    // countries are turned on/off
+    var i = 0;
+  //  $.each(datasets, function(key, val) {
+  //    if(val.color=== undefined){}
+ //       else{val.color = i;
+ //       ++i;}
+ //   });
+    
+   // i = 0;
+    //Not needed, as all colors are assigned explicitly
+  // $.each(datasets2, function(key, val) {
+    //    val.color = i;
+   //     ++i;
+   // });
+    
+    
+    // insert checkboxes 
+    var choiceContainer = $("#choices");
+    var choiceContainer2 = $("#choices2");
+    
+    $.each(datasets, function(key, val) {
+     //<br/><br/>
+      if(val.label === undefined){}
+     else{
+        choiceContainer.append('<input type="checkbox" name="' + key +
+                               '" checked="checked" id="id' + key + '">' +
+                               '<label for="id' + key + '">'
+                                + val.label + '</label>'+"    ");
+                                }//end else
+    });
+    
+     $.each(datasets2, function(key, val) {
+     //<br/><br/>
+     if(val.label === undefined){}
+     else{
+        choiceContainer2.append('<input type="checkbox" name="' + key +
+                               '" checked="checked" id="id' + key + '">' +
+                               '<label for="id' + key + '">'
+                                + val.label + '</label>'+"    ");
+                                }//end else
+                                
+    });
+    
+    
+    
+    //re plot when a button is clicked
+    choiceContainer.find("input").click(plotAccordingToChoices);
+	choiceContainer2.find("input").click(plotAccordingToChoices2);
+
+//not implemented for placeholder2 yet
+    $("#placeholder").bind("plotclick", function (event, pos, item) {
+       
+       
+        if (item) {
+          $("#message").text("Selected: "+item.series.label+ " minute: "+item.dataIndex+" [Timestamp, Value]: ["+item.datapoint+"]");
+        //  $("#message").text("Selected: "+item.series.label+ " minute: "+(pos.x-json.firstTimestamp)/60000+" Value: "+datapoint);
+          // $("#message").text("totalSleep: "+json.sleepDuration+" json.numberOfEpochs["+json.numberOfEpochs+"]");
+       }
+    });
+
+
+
+var plot; 
+  
+    function plotAccordingToChoices() {
+        var data = [];
+        
+
+        choiceContainer.find("input:checked").each(function () {
+            var key = $(this).attr("name");
+            if (key && datasets[key])
+                data.push(datasets[key]);
+        });
+
+        if (data.length > 0)
+          plot = $.plot($("#placeholder"), data, {
+         //       yaxis: { min: 0 },
+                legend: {show:true, container: $("#legend"),noColumns: 7  },
+              	yaxes: [ {position: "right",},//axis1 
+              	//axis 2 is log scale
+              	 { position: "right",
+              	// transform: function (v) { //need a function to cut off excessive motion
+		          //    	 if(v>1){return 10*Math.log(v)/Math.log(10);} //10 log 10 is dB
+		            //  	 else{ return 0;}
+              	   //},
+              	// inverseTransform: function (v) { return 10^(v/10);}
+              	 },
+              	 {},{}], //axis 3 and 4  
+                xaxis: {mode: "time", timeformat: "%H:%M",},
+                grid: {clickable: true},
+                
+            });
+            
+    }
+    
+   var plot2; 
+      function plotAccordingToChoices2() {
+        var data = [];
+        
+
+        choiceContainer2.find("input:checked").each(function () {
+            var key = $(this).attr("name");
+            if (key && datasets2[key])
+                data.push(datasets2[key]);
+        });
+
+        if (data.length > 0)
+          plot2 = $.plot($("#placeholder2"), data, {
+         //       yaxis: { min: 0 },
+                legend: {show:true, container: $("#legend2"),noColumns: 7  },
+                lines: { steps: true },
+              	yaxes: [ {position: "right",min:0, max: sleepScoreYMax},//axis1 
+              	//axis 2 is log scale
+              	 { position: "right", min:0,  max:35, show: false
+              	// transform: function (v) { //need a function to cut off excessive motion
+		          //    	 if(v>1){return 10*Math.log(v)/Math.log(10);} //10 log 10 is dB
+		            //  	 else{ return 0;}
+              	   //},
+              	// inverseTransform: function (v) { return 10^(v/10);}
+              	 },
+              	 {min:0, max:70,show:false},{}], //axis 3 and 4  
+                xaxis: {mode: "time", timeformat: "%H:%M",},
+               // grid: {clickable: true},
+                
+            });
+            
+    }
+    
+    
+    
+    
+    //pie chart data
+   	var data = [];
+	
+	//data[i] = { label: "Series"+(i+1), data: Math.floor(Math.random()*100)+1 }
+	
+	//data[0]={ label: "Total Sleep",json.totalSleepDuration.length };
+	//data[1]={ label: "Restful Sleep", json.totalSleepDuration.length-100 };
+	var diff;
+	if(json.totalTimeInBed-json.totalMinutesAsleep>0){
+		diff = json.totalTimeInBed-json.totalMinutesAsleep; 
+	}else{diff = 0;}
+	
+	data[0]={data:0};
+	data[1]={data:0};//to get the colors we need
+	data[2]={ label: "Non Restful Sleep", data: diff};
+	data[3]={ label: "Restful Sleep", data: json.totalMinutesAsleep};	
+	//data[0]={ label: "Total Sleep", data: 400 };
+	//data[1]={ label: "Time in Bed", data: 200 };
+	
+   
+   // GRAPH 4
+	$.plot($("#graph4"), data, 
+	{
+		series: {
+			pie: { 
+				show: true,
+				radius: 1,
+				label: {
+					show: true,
+					radius: 3/4,
+					formatter: function(label, series){
+						return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
+					},
+					background: { 
+						opacity: 0.5,
+						color: '#000'
+					}
+				}
+			}
+		},
+		legend: {
+			show: false
+		}
+	});
+	
+function updateStatistics(){
+
+
+
+
+
+
+$("#averageTimeInBed").text(json.averageTimeInBed);
+$("#totalTimeInBed").text(json.totalTimeInBed+" min");
+
+$("#totalMinutesAsleep").text(json.totalMinutesAsleep +" min");
+$("#averageMinutesAsleep").text(json.averageMinutesAsleep);
+
+$("#longestSleepEpisode").text(json.longestSleepEpisode +" min");
+
+$("#sleepOnsetLatency").text(json.sleepOnsetLatency +" min");
+$("#averageSleepOnsetLatency").text(json.averageSleepOnsetLatency);
+
+
+$("#numberOfAwakenings").text(json.numberOfAwakenings);
+$("#averageNumberOfAwakenings").text(json.averageNumberOfAwakenings);
+
+$("#averageNumberOfUserEvents").text(json.averageNumberOfUserEvents);
+$("#numberOfUserEvents").text(json.numberOfUserEvents);
+
+
+$("#averageNumberOfVoiceReminders").text(json.averageNumberOfVoiceReminders);
+$("#numberOfVoiceReminders").text(json.numberOfVoiceReminders);
+
+
+$("#averageNumberOfDreams").text(json.averageNumberOfDreams);
+$("#numberOfDreams").text(json.numberOfDreams);
+
+$("#averageNumberOfLucidDreams").text(json.averageNumberOfLucidDreams);
+$("#numberOfLucidDreams").text(json.numberOfLucidDreams);
+
+$("#averageGoingToSleepTime").text(json.averageGoingToSleepTime);
+$("#averageWakingUpTime").text(json.averageWakingUpTime);
+
+
+}
+
+function updateTitle(){
+$("#title").text(json.title);
+}
+
+//TODO insert android picture here
+function updateAnalysis(){
+$("#analysis").text(""+json.analysis);
+}
+
+//update string values
+updateTitle();
+updateStatistics();
+//updateAnalysis();
+
+//has to happen before interacting with axis
+  plotAccordingToChoices();
+    plotAccordingToChoices2();
+    
+    //____________________Attempt to interact with axis
+        // now for each axis, create a div
+
+    function getBoundingBoxForAxis(plot, axis) {
+        var left = axis.box.left, top = axis.box.top,
+            right = left + axis.box.width, bottom = top + axis.box.height;
+
+        // some ticks may stick out, enlarge the box to encompass all ticks
+        var cls = axis.direction + axis.n + 'Axis';
+        plot.getPlaceholder().find('.' + cls + ' .tickLabel').each(function () {
+            var pos = $(this).position();
+            left = Math.min(pos.left, left);
+            top = Math.min(pos.top, top);
+            right = Math.max(Math.round(pos.left) + $(this).outerWidth(), right);
+            bottom = Math.max(Math.round(pos.top) + $(this).outerHeight(), bottom);
+        });
+        
+        return { left: left, top: top, width: right - left, height: bottom - top };
+    }
+    
+    $.each(plot.getAxes(), function (i, axis) {
+        if (!axis.show)
+            return;
+        
+        var box = getBoundingBoxForAxis(plot, axis);
+        
+        $('<div class="axisTarget" style="position:absolute;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>')
+            .data('axis.direction', axis.direction)
+            .data('axis.n', axis.n)
+            .css({ backgroundColor: "#f00", opacity: 0, cursor: "pointer" })
+            .appendTo(plot.getPlaceholder())
+            .hover(
+                function () { $(this).css({ opacity: 0.10 }) },
+                function () { $(this).css({ opacity: 0 }) }
+            )
+            .click(function () {
+          
+                
+            if(""+axis.direction + axis.n=="x1"){	
+           			 $("#message").text("Local time using 24 hour format");
+            }           
+                 if(""+axis.direction + axis.n=="y1"){	
+           			 $("#message").text("Total time asleep in minutes");
+            }            
+                 if(""+axis.direction + axis.n=="y4"){	
+           			 $("#message").text("Axis for total sleep duration (green line) in minutes");
+            } if(""+axis.direction + axis.n=="y3"){	
+           			 $("#message").text("Axis for  sleep score (red line). User is asleep when this score is less than 1");
+            } if(""+axis.direction + axis.n=="y2"){	
+           			 $("#message").text("Activity count (yellow line) in arbitrary units. Larger motions contribute more to this score than smaller ones");
+            }
+            
+            });
+    });
+    
+    //--------------------End attempt to interact with axis
+    
+
+  
+});
+</script>
+	<style type="text/css">
+		{
+		  font-family: sans-serif;
+		}
+		
+		body
+		{
+			padding: 0 1em 1em 1em;
+		}
+		
+		div.graph
+		{
+			width: 250px;
+			height: 250px;
+			float: left;
+			border: 1px dashed gainsboro;
+		}
+		
+		label
+		{
+		
+			
+		}
+
+		table
+		{
+		border: 1px dashed gainsboro;
+		}
+		
+		table.statistics {
+	border-width: 1px;
+	border-spacing: ;
+	border-style: none;
+	border-color: gray;
+	border-collapse: separate;
+	background-color: white;
+}
+table.statistics th {
+	border-width: 1px;
+	padding: 1px;
+	border-style: dotted;
+	border-color: gray;
+	background-color: white;
+	-moz-border-radius: ;
+}
+table.statistics td {
+	border-width: 1px;
+	padding: 1px;
+	border-style: dotted;
+	border-color: gray;
+	background-color: white;
+	-moz-border-radius: ;
+}
+		
+		
+		code b
+		{
+			color: black;
+		}
+		
+		
+	</style>
+ </body>
+</html>

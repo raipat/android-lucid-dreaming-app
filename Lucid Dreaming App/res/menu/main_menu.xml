@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+<item android:icon="@android:drawable/ic_menu_recent_history" android:id="@+id/menu_start_app" android:title="@string/menu_start_app" android:titleCondensed="@string/menu_start_app" android:numericShortcut="1" android:alphabeticShortcut="s"></item>
+
+ <item android:title="@string/menu_view_data" android:checked="true" android:id="@+id/menu_load_data" android:icon="@android:drawable/ic_menu_slideshow" android:titleCondensed="@string/menu_view_data" android:alphabeticShortcut="l" android:numericShortcut="2"></item>
+  <item android:title="Contribute to science" android:id="@+id/menu_share_data" android:icon="@android:drawable/ic_menu_share" android:titleCondensed="Contribute to science" android:alphabeticShortcut="l" android:numericShortcut="2"></item>
+ 
+  <item android:icon="@android:drawable/ic_menu_preferences" android:title="@string/menu_preferences" android:id="@+id/menu_preferences" android:numericShortcut="p" android:alphabeticShortcut="3"/> 
+    
+ <item android:icon="@android:drawable/ic_menu_help" android:title="@string/main_menu_help" android:id="@+id/menu_help" android:numericShortcut="5" android:alphabeticShortcut="h"></item>
+   
+<item android:icon="@android:drawable/ic_menu_close_clear_cancel" android:title="@string/main_menu_exit" android:id="@+id/menu_exit" android:numericShortcut="0" android:alphabeticShortcut="e"></item>
+
+
+</menu>

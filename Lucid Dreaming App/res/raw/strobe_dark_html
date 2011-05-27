@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Lucid Dreaming App Bright HTML</title>
+    
+   <style type="text/css">
+	{	
+		  font-family: sans-serif;		  
+	}
+	
+	body{	
+	font-size: 16px;
+	color:gray;  			
+	}
+	h1{
+	color:gray;
+	}
+
+		
+	</style>
+   </head>
+    <body bgcolor="black">
+ 
+    <CENTER><IMG SRC="lightning-dark.jpg"></CENTER>
+  
+ 
+ </body>
+ 
+ 
+
+</html>
