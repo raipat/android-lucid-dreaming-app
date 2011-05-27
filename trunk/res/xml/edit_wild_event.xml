@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="@string/rem_reminder_screen_title">
+	<Preference
+			android:key="commitChanges"
+			android:title="COMMIT CHANGES"
+			android:summary="Save changes and return to the previous screen"			
+			 />	
+	
+			<CheckBoxPreference android:defaultValue="true"
+			android:key="reminderSet" android:title="Activate event"
+			android:summary="Inactive event's reminders will not be played. Disabled REM events are still a part of Smart Timer logic" />
+			
+			<Preference
+			android:key="startTime"
+			android:title="Pick event start time"
+			android:summary="Pick event start time"			
+			/>			
+		
+			 
+			 <Preference
+			android:key="testReminder"
+			android:title="Test Reminder"
+			android:summary="Play the current combination of voice, vibrate and sound to see how it works"			
+			 />	
+			</PreferenceCategory>
+			
+			
+			<PreferenceCategory android:title="Configure reminders">
+			
+			<CheckBoxPreference android:defaultValue="true"
+			android:key="useVoiceReminder" android:title="Add voice reminder"
+			android:summary="@string/pref_play_sound_reminders_summary" />
+			<Preference
+			android:key="filePicker"
+			android:title="Pick voice reminder"
+			android:summary="Select a voice reminder for this REM event"/>
+			
+			<CheckBoxPreference android:defaultValue="false"
+			android:key="useVibrateReminder" android:title="Add vibrate reminder"
+			android:summary="Phone will vibrate the provided string in morse code" />
+			
+			 <EditTextPreference
+                android:name="Set Vibrate Text"
+                android:summary="Each character gets converted into a sequence of morse code vibrations"
+                android:defaultValue="morse code"
+                android:inputType="text"
+                android:title="Set Vibrate Text"
+                android:key="vibrateMessage" />
+                
+                <com.luciddreamingapp.beta.util.SeekBarPreference
+			
+            android:title="Set Vibrate Duration"
+            android:summary="Length of the morse code dot in milliseconds. Longer values cause the vibrations to take longer to play out, but may be annoying"
+            android:dialogMessage="@string/pref_morse_code_duration"
+			android:text="@string/milliseconds"
+						
+			android:key="vibrateDotDuration"
+						
+			android:defaultValue="120" 
+			android:max="1000"   />
+               
+			
+			
+			<CheckBoxPreference android:defaultValue="false"
+			android:key="useStrobe" android:title="Add light reminder"
+			android:summary="Phone's screen will become bright and flash images in morse code" />
+			
+			 <EditTextPreference          
+                android:summary="Each character gets converted into a sequence of light flashes"
+                android:defaultValue="morse code"
+                android:inputType="text"
+                android:title="Set Light Strobe Text"
+                android:key="flashMessage" />
+             
+             <com.luciddreamingapp.beta.util.SeekBarPreference		
+            android:title="Strobe Flash Duration"
+            android:summary="Length of the morse code dot in milliseconds. Shorter values may be less visible and are more visually annoying. This may or may not be synchronized to the vibration"
+           android:dialogMessage="@string/pref_morse_code_duration"
+			android:text="@string/milliseconds"
+						
+			android:key="flashDotDuration"
+						
+			android:defaultValue="360" 
+			android:max="3000"   />
+		   
+		<Preference
+			android:key="commitChanges2"
+			android:title="COMMIT CHANGES"
+			android:summary="Save changes and return to the previous screen"			
+			 />	
+		
+	</PreferenceCategory>
+
+</PreferenceScreen>
