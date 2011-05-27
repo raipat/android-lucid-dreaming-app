@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+<item android:icon="@android:drawable/ic_menu_gallery"
+	android:numericShortcut="1" android:alphabeticShortcut="g"
+	android:id="@+id/menu_load_data" android:titleCondensed="@string/menu_load_graph"
+	android:title="Load Graph"></item>
+	<item android:title="View History" android:id="@+id/menu_history"
+		android:icon="@android:drawable/ic_menu_slideshow"
+		android:titleCondensed="@string/menu_view_history"
+		android:alphabeticShortcut="h" android:numericShortcut="3"></item>
+	<item android:icon="@android:drawable/ic_menu_camera"
+		android:title="Screenshot" android:id="@+id/menu_screenshot"
+		android:numericShortcut="2" android:alphabeticShortcut="s" />
+	<item android:icon="@android:drawable/ic_menu_preferences"
+		android:title="@string/menu_preferences" android:id="@+id/menu_preferences"
+		android:numericShortcut="0" android:alphabeticShortcut="p" />
+	<item android:icon="@android:drawable/ic_menu_help" android:title="@string/main_menu_help"
+		android:id="@+id/menu_help" android:numericShortcut="5"
+		android:alphabeticShortcut="h"></item>
+
+	<item android:title="@string/menu_exit_app" android:icon="@android:drawable/ic_menu_close_clear_cancel"
+		android:titleCondensed="@string/menu_exit_app"
+		android:numericShortcut="8" android:alphabeticShortcut="b"
+		android:id="@+id/menu_exit"></item>
+	
+</menu>

@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="@string/rem_reminder_screen_title">
+	
+			<CheckBoxPreference android:defaultValue="true"
+			android:key="play_sound_pref" android:title="@string/pref_play_sound_reminders"
+			android:summary="@string/pref_play_sound_reminders_summary" />
+			
+			
+			<CheckBoxPreference android:defaultValue="true"
+			android:key="play_sound_pref" android:title="@string/pref_allow_data_upload_title"
+			android:summary="@string/pref_allow_data_upload_summary" />
+			
+			<PreferenceScreen android:key="remPredictionPrefs"
+			android:title="@string/rem_prediction_screen_title"
+			android:summary="@string/rem_prediction_screen_summary">
+			
+			<CheckBoxPreference 
+			
+			android:key="enable_smart_timer"
+			
+			android:defaultValue="true"			
+			android:title="@string/pref_enable_smart_timer_title"
+			android:summary="@string/pref_enable_smart_timer_summary" />
+			
+			<Preference
+			android:title="@string/pref_switch_smart_timer_config_title"
+			android:summary="@string/pref_switch_smart_timer_config_summary"
+			
+			android:key="switch_smart_timer_config"
+			android:defaultValue=""
+			 />
+			
+			
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_minimum_reminder_spacing_title"
+			android:summary="@string/pref_minimum_reminder_spacing_summary"
+			android:dialogMessage="@string/pref_minimum_reminder_spacing_dialog_text"
+			android:text="@string/pref_minimum_reminder_spacing_units_text"
+			
+			android:key="minimum_reminder_spacing"
+			android:max="45" 
+			android:defaultValue="15"
+		 />
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_rem_prediction_activity_threshold_title"
+			android:summary="@string/pref_rem_prediction_activity_threshold_summary"
+			android:dialogMessage="@string/pref_rem_prediction_activity_threshold_dialog_text"
+			android:text="@string/pref_rem_prediction_activity_threshold_units_text"
+					
+			android:key="rem_prediction_activity_threshold"
+				
+			android:max="50" 
+			android:defaultValue="10"
+			 />
+			
+			</PreferenceScreen>
+	
+		<PreferenceScreen android:key="remTiming"
+			android:title="@string/rem_detection_screen_title"
+			android:summary="@string/rem_detection_screen_summary"
+				>
+			
+			
+			<CheckBoxPreference android:defaultValue="false"
+			android:title="@string/pref_play_sound_reminders_non_rem_title"
+			android:dependency="play_sound_pref"
+			android:summary="@string/pref_play_sound_reminders_non_rem_summary"
+			android:key="play_sound_pref_non_rem" />
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_number_of_reminders_title"
+			android:summary="@string/pref_number_of_reminders_summary"
+			android:dialogMessage="@string/pref_number_of_reminders_dialog_text"
+			android:text="@string/pref_number_of_reminders_units_text"
+			
+			android:key="number_of_reminders"
+			
+			android:max="10" 
+			android:defaultValue="1"  />
+			
+			
+			<PreferenceScreen android:key="earlyNightPrefs"
+			
+			android:title="@string/pref_screen_early_night_title"
+			android:summary="@string/pref_screen_early_night_summary">
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_min_asleep_title"
+			android:summary="@string/pref_min_asleep_summary"
+			android:dialogMessage="@string/pref_min_asleep_dialog_text"
+			android:text="@string/pref_min_asleep_text"
+					
+			android:key="deep_sleep_120_earliest"
+			
+			android:defaultValue="45" 
+			android:max="60"  />
+
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+				
+			android:title="@string/pref_max_asleep_title"
+			android:summary="@string/pref_max_asleep_summary"
+			android:dialogMessage="@string/pref_max_asleep_dialog_text"
+			android:text="@string/pref_max_asleep_text"
+				
+			android:key="deep_sleep_120_latest"
+			
+			android:dependency="play_sound_pref_non_rem"
+			android:defaultValue="55" 
+			android:max="60"  />
+
+		</PreferenceScreen>
+
+		<PreferenceScreen android:key="midNightPrefs"
+			android:title="@string/pref_screen_mid_night_title"
+			android:summary="@string/pref_screen_mid_night_summary"	>
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_min_asleep_title"
+			android:summary="@string/pref_min_asleep_summary"
+			android:dialogMessage="@string/pref_min_asleep_dialog_text"
+			android:text="@string/pref_min_asleep_text"
+			
+			android:key="deep_sleep_150_earliest"			
+						
+			android:defaultValue="30"
+			android:max="60"  />
+
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			
+			android:title="@string/pref_max_asleep_title"
+			android:summary="@string/pref_max_asleep_summary"
+			android:dialogMessage="@string/pref_max_asleep_dialog_text"
+			android:text="@string/pref_max_asleep_text"
+			
+			android:key="deep_sleep_150_latest"
+				
+			android:dependency="play_sound_pref_non_rem"	
+			android:defaultValue="45" 					
+			android:max="60"  />
+
+		</PreferenceScreen>
+
+
+		<PreferenceScreen android:key="lateNightPrefs"
+			android:title="@string/pref_screen_late_night_title"
+			android:summary="@string/pref_screen_late_night_summary">
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_min_asleep_title"
+			android:summary="@string/pref_min_asleep_summary"
+			android:dialogMessage="@string/pref_min_asleep_dialog_text"
+			android:text="@string/pref_min_asleep_text"
+			
+			android:key="deep_sleep_180_earliest"			
+				
+			android:defaultValue="20" 
+			android:max="60"  />
+
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			
+			android:title="@string/pref_max_asleep_title"
+			android:summary="@string/pref_max_asleep_summary"
+			android:dialogMessage="@string/pref_max_asleep_dialog_text"
+			android:text="@string/pref_max_asleep_text"
+			
+			android:key="deep_sleep_180_latest" 
+			
+			android:dependency="play_sound_pref_non_rem"
+			android:defaultValue="25"
+			android:max="60" />
+
+<!-- need to test these before removing them -->
+		</PreferenceScreen>
+		
+					<PreferenceScreen android:key="inactivePreferences"
+					android:enabled="false"
+					android:title="Misc inactive preferences"
+					android:summary="These preferences have no function, but I need to test how their removal affects the rest of the app.">
+					
+					<CheckBoxPreference android:defaultValue="false"
+					android:enabled="false"
+					android:title="Enable experimental REM Detection"			
+					android:summary="[Experimental] Enable more accurate method of detecting REM. "
+					android:key="enable_sleep_cycle_rem_detection_pref" />
+					
+					<Preference
+					android:enabled="false"
+					android:summary="Click to go to www.LucidDreamingApp.com for instructions"
+					android:key="sleep_cycle_rem_instructions"
+					android:defaultValue=""
+					android:title="Instructions" />
+					
+					<com.luciddreamingapp.beta.util.SeekBarPreference
+					android:enabled="false"
+					android:max="10" android:title="Standard Deviation"
+					android:summary="Sleep cycle standard deviation (used in sleep cycle detection)"
+					android:key="sleep_cycle_standard_deviation" android:defaultValue="5"
+					android:text=" minutes" android:dialogMessage="Play reminder x minutes before the sleep cycle is over" />
+					
+					<com.luciddreamingapp.beta.util.SeekBarPreference
+					android:enabled="false"
+					android:max="120" android:title="Sleep Cycle Guess"
+					android:summary="Set the initial guess for how long your sleep cycles are (90-110 minutes) . This value will be automatically adjusted in future releases"
+					android:key="sleep_cycle_duration" android:defaultValue="95"
+					android:text=" minutes" android:dialogMessage="My average sleep cycle is" />
+					</PreferenceScreen>
+			
+			</PreferenceScreen>
+			
+			
+	</PreferenceCategory>
+	
+	<PreferenceCategory android:title="Customize Gestures">
+	
+		<CheckBoxPreference 
+			android:key="enable_gestures"
+			
+			android:defaultValue="true"
+			android:title="@string/pref_enable_gestures_title"
+			android:summary="@string/pref_enable_gestures_summary"	 />
+			
+			<Preference
+			android:key="gesture_builder_pref"
+			android:title="@string/pref_edit_gestures_title"
+			android:summary="@string/pref_edit_gestures_summary"
+			
+			android:defaultValue="" />
+			
+	</PreferenceCategory>
+	
+	
+	<PreferenceCategory android:title="@string/customize_reminders_title">
+			<PreferenceScreen
+		android:key="configureSound"
+		
+		android:title="@string/pref_screen_sound_reminders_title"
+		android:summary="@string/pref_screen_sound_reminders_summary">
+			
+			<Preference
+			android:title="@string/pref_get_voice_recorder_title"
+			android:summary="@string/pref_get_voice_recorder_summary"
+			
+			android:key="get_voice_recorder_pref" android:defaultValue=""
+			 />
+	
+	
+			<CheckBoxPreference android:defaultValue="true"
+			android:key="old_file_selection_pref"
+			 android:title="@string/pref_file_selection_override"
+			  android:summary="@string/pref_file_selection_override_summary"/>	
+	
+	
+			<Preference
+			android:key="filePicker"
+			android:title="@string/pref_pick_voice_reminder_title"
+			android:summary="@string/pref_pick_voice_reminder_summary"			
+			
+			android:defaultValue="@string/default_reminder_filepath" />		
+					
+			
+			
+			<Preference
+			android:key="play_reminder_file_pref" 
+			android:title="@string/pref_play_voice_reminder_title"
+			android:summary="@string/pref_play_voice_reminder_summary"	
+			android:defaultValue="" />
+			</PreferenceScreen>
+			
+			
+			<PreferenceScreen
+		android:key="configureWILDTimer"
+		
+		android:title="@string/pref_screen_configure_wild_timer_title"
+		android:summary="@string/pref_screen_configure_wild_timer_summary">
+		
+		<Preference
+			android:title="@string/pref_switch_wild_timer_config_title"
+			android:summary="@string/pref_switch_wild_timer_config_summary"
+			
+			android:key="switch_wild_timer_config"
+			android:defaultValue=""
+			 />
+		
+		
+		
+		
+		</PreferenceScreen>
+			
+			
+			
+			<CheckBoxPreference android:defaultValue="false"
+			android:key="challenging_math_puzzle"
+			android:title="@string/pref_challenging_math_puzzle_title"
+			android:summary="@string/pref_challenging_math_puzzle_summary"/>
+			
+			
+
+	</PreferenceCategory>
+	
+	
+	<PreferenceCategory android:title="@string/app_calibration_title">
+	
+		<PreferenceScreen
+		android:key="sensorCalibrationDuration"
+		
+		android:title="@string/pref_screen_app_calibration_title"
+		android:summary="@string/pref_screen_app_calibration_summary">
+		
+		 			
+			
+			<ListPreference 
+                        android:key="accelerometer_sampling_rate"
+                        
+                        android:title="@string/pref_actigraphy_sampling_rate_title"
+						android:summary="@string/pref_actigraphy_sampling_rate_summary"
+                        
+                        android:defaultValue="1200"
+                        android:entries="@array/accelerometer_sampling_rate_array"
+                        android:entryValues="@array/accelerometer_sampling_rate_values" />
+                        
+
+			
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			
+			android:title="@string/pref_accelerometer_calibration_duration_title"
+			android:summary="@string/pref_accelerometer_calibration_duration_summary"
+			android:dialogMessage="@string/pref_accelerometer_calibration_duration_dialog_text"
+			android:text="@string/pref_accelerometer_calibration_duration_text"
+			
+			
+			android:key="accelerometer_calibration_duration_min"
+						
+			android:defaultValue="7" 
+			android:max="120"   />
+				
+			<Preference
+			android:title="@string/pref_start_calibration_title"
+			android:summary="@string/pref_start_calibration_summary"
+                        
+            android:key="calibrate_sensor"
+			
+			android:defaultValue=""	/>	
+			 			
+		</PreferenceScreen>
+		
+	
+	</PreferenceCategory>
+
+
+<PreferenceCategory android:title="@string/data_logging_title">
+
+			<PreferenceScreen android:key="dataLoggingOptions"
+			
+			android:title="@string/pref_screen_logging_display_preferences_title"
+			android:summary="@string/pref_screen_logging_display_preferences_summary" >
+	
+		
+			
+	<CheckBoxPreference 
+			android:defaultValue="true"
+			android:key="graph_data_autosave_pref"
+			
+			android:title="@string/pref_enable_graph_autosave_title"
+			android:summary="@string/pref_enable_graph_autosave_summary" />
+			<CheckBoxPreference 
+			android:defaultValue="true"
+			android:key="log_data_pref"
+			
+			android:title="@string/pref_enable_csv_logging_title"
+			android:summary="@string/pref_enable_csv_logging_summary" />
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_clock_digit_title"
+			android:summary="@string/pref_clock_digit_summary"
+			android:dialogMessage="@string/pref_clock_digit_dialog_text"
+			android:text="@string/pref_clock_digit_units_text"
+			
+			android:key="clock_digit_size" 
+			
+			android:enabled="true"
+			android:max="128"
+			android:defaultValue="128"/>
+						
+		<Preference
+			android:key="clock_color_preference"
+			android:title="@string/pref_pick_clock_color_title"
+			android:summary="@string/pref_pick_clock_color_summary"
+			android:defaultValue="" />
+			
+			<CheckBoxPreference 
+			android:defaultValue="true"
+			android:key="enable_screen_brightness_adjustment"
+			
+			android:title="@string/pref_enable_screen_brightness_title"
+			android:summary="@string/pref_enable_screen_brightness_summary" />
+	<com.luciddreamingapp.beta.util.SeekBarPreference
+		
+		
+			android:title="@string/pref_screen_brightness_title"
+			android:summary="@string/pref_screen_brightness_summary"
+			android:dialogMessage="@string/pref_screen_brightness_dialog_text"
+			android:text="@string/pref_screen_brightness_text"
+			
+			android:key="brightness_level" 
+			android:dependency="enable_screen_brightness_adjustment"
+		
+				android:defaultValue="10" 
+				android:max="100"
+			/>
+	
+	
+	
+		<com.luciddreamingapp.beta.util.SeekBarPreference
+		
+		
+			android:title="@string/pref_sleep_score_y_max_title"
+			android:summary="@string/pref_sleep_score_y_max_summary"
+			android:dialogMessage="@string/pref_sleep_score_y_max_dialog_text"
+			android:text="@string/pref_sleep_score_y_max_text"
+			
+			android:key="sleep_score_y_axis_max" 
+		
+				android:defaultValue="35" 
+				android:max="100"
+				android:enabled="true"/>
+				
+		<com.luciddreamingapp.beta.util.SeekBarPreference		
+		
+			android:title="@string/pref_activity_count_y_max_title"
+			android:summary="@string/pref_activity_count_y_max_summary"
+			android:dialogMessage="@string/pref_activity_count_y_max_dialog_text"
+			android:text="@string/pref_activity_count_y_max_text"
+		
+			android:key="activity_count_y_axis_max" 
+		
+			android:defaultValue="2500" 				 
+			android:max="4000"
+			android:enabled="true"/>
+			
+		
+			
+			<CheckBoxPreference 			
+			android:key="log_detailed_data_pref"
+			
+			android:title="@string/pref_enable_detailed_csv_logging_title"
+			android:summary="@string/pref_enable_detailed_csv_logging_summary"
+			
+			android:defaultValue="false"
+			android:enabled="false"	/>
+			
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference			
+			
+			android:title="@string/pref_detailed_logging_rate_title"
+			android:summary="@string/pref_detailed_logging_rate_summary"
+			android:dialogMessage="@string/pref_detailed_logging_rate_dialog_text"
+			android:text="@string/pref_detailed_logging_rate_text"
+			
+			android:key="detailed_data_logging_rate"
+			 
+			android:defaultValue="2"
+			android:max="30"
+			android:enabled="false"/>
+</PreferenceScreen>
+	</PreferenceCategory>
+
+	
+	
+		
+
+	<PreferenceCategory android:title="@string/advanced_options_title">
+		
+		<PreferenceScreen 
+		android:key="sensorFineTuning"
+		
+		
+		android:title="@string/pref_screen_sensitivity_tuning_title"
+		android:summary="@string/pref_screen_sensitivity_tuning_summary"
+		>
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference			
+			
+			android:title="@string/pref_activity_threshold_title"
+			android:summary="@string/pref_activity_threshold_summary"
+			android:dialogMessage="@string/pref_activity_threshold_dialog_text"
+			android:text="@string/pref_activity_threshold_text"
+			
+			android:key="activity_threshold"	
+			
+			android:defaultValue="13" 
+			android:max="150"  />
+			
+			
+			<Preference			
+			android:title="@string/pref_recalculate_cole_constant_title"
+			android:summary="@string/pref_recalculate_cole_constant_summary"			
+			
+			android:key="recalculate_cole_constant" android:defaultValue="" />
+				
+				
+			<CheckBoxPreference
+			android:defaultValue="false"
+			android:key="calibration_completed"
+			
+			android:title="@string/pref_calibration_completed_title"
+			android:summary="@string/pref_calibration_completed_summary" />
+				
+
+		</PreferenceScreen>		
+		
+
+	</PreferenceCategory>
+
+</PreferenceScreen>

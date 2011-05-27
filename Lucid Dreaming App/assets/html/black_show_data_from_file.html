@@ -1,0 +1,404 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Sleep Data Viewer</title>
+    <link href="layout_black.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../jquery.min.js"></script>   
+    <script language="javascript" type="text/javascript" src="../jquery.flot.min.js"></script>
+     <script language="javascript" type="text/javascript" src="../jquery.flot.pie.min.js"></script>
+      <script language="javascript" type="text/javascript" src="../jquery.flot.symbol.min.js"></script>
+      
+    <script language="javascript" type="text/javascript" src="../jquery.flot.selection.min.js"></script>
+ </head>
+ <body>
+ 	<p><span id="title">Graphs appear after 8 minutes and refresh every 60 sec</span></p>
+    
+    <div id="placeholder" style="width:900px;height:450px;font-color: white;"></div>
+     <div style="float:left;width:900px;height:50px;border: 1px dashed gainsboro;font-color: white;" id="legend"></div>
+   
+	<p><span id="message"></span></p>    
+   <div id="choices">Show data for:</div>
+   
+<br/>
+<h3>Sleep quality:</h3>
+
+<table>
+	<tr><td>
+    <div id="graph4" class="graph"></div>
+</td>
+<td> <div id="divider" style="width:20px;height:1px;"></div></td>
+
+<td>
+
+	<table>
+	<tr>
+	<td><h3>Sleep Statistics</h3></td>
+	</tr>
+	<tr>
+	<td>Total Time in Bed</td><td><span id="totalTimeInBed"></span></td>
+	</tr>
+	<tr>
+	<td>Total Minutes Asleep</td><td><span id="totalMinutesAsleep"></span></td>
+	</tr>
+	<tr>
+	<td>Longest Sleep Episode</td><td><span id="longestSleepEpisode"></span></td>
+	</tr>
+	<tr>
+	<td>Sleep Onset Latency</td><td><span id="sleepOnsetLatency"></span></td>
+	</tr>
+	<tr>
+	<td>Number Of Awakenings</td><td><span id="numberOfAwakenings"></span></td>
+	</tr>
+
+	<tr>
+	<td>Number Of User Events</td><td><span id="numberOfUserEvents"></span></td>
+	</tr>
+	<tr>
+	<td>Number Of Reminders Played</td><td><span id="numberOfVoiceReminders"></span></td>
+	</tr>
+	<tr>
+	<td>Number Of Dreams Entered</td><td><span id="numberOfDreams"></span></td>
+	</tr>
+	<tr>
+	<td>Number Of Lucid Dreams</td><td><span id="numberOfLucidDreams"></span></td>
+	</tr>
+	
+	</table>
+
+</td></tr>
+
+</table>
+
+Analysis: <div id="analysis"></div>
+
+
+<script type="text/javascript">
+$(function () {
+
+var temp = window.javahandler.getJson1();
+var json = eval("(" + temp + ")");
+
+
+ // setup control widget
+    var updateInterval = 3000;
+    $("activityYLimit").val(updateInterval).change(function () {
+        var v = $(this).val(); //check value on change event
+        if (v && !isNaN(+v)) { 
+            updateInterval = +v;
+            if (updateInterval < 1)
+                updateInterval = 1;
+            
+            $(this).val("" + updateInterval);
+            plotAccordingToChoices();
+        }
+    });
+ var activityCountYMax;
+ if(json.activityCountYMax === undefined){activityCountYMax=2500;}
+ else{
+ activityCountYMax= json.activityCountYMax;
+ }
+ 
+  var sleepScoreYMax;
+ if(json.sleepScoreYMax === undefined){sleepScoreYMax=35;}
+ else{
+ sleepScoreYMax= json.sleepScoreYMax;
+ }
+ 
+
+    var datasets = {
+        "xyzActivityCount": {
+            label: json.xyzActivityCountLabel,
+            data: json.xyzActivityCount,
+            shadowSize: 0,
+            color:0,
+            yaxis: 2,
+            },        
+        "sleepWakeEpisodes": {
+            label: json.sleepWakeEpisodesLabel,
+            data: json.sleepWakeEpisodes,
+            shadowSize: 0,
+            color: 1,
+             },
+           "coleSleepScore": {
+            label: json.coleSleepScoreLabel,
+            data: json.coleSleepScore,
+            shadowSize: 0,
+            yaxis: 3,
+            color:2,
+            },             
+        "totalSleepDuration": {
+            label: json.totalSleepDurationLabel,
+            data: json.totalSleepDuration,
+            shadowSize: 0,
+            yaxis: 4,
+            color: 3,
+            },     
+             "audioLevel":{
+            label: json.audioLevelLabel,
+            data: json.audioLevel,
+               shadowSize: 0,
+            yaxis: 5,
+            color:4,
+            },
+             "audioLevelKurtosis":{
+            label: json.audioLevelKurtosisLabel,
+            data: json.audioLevelKurtosis,
+               shadowSize: 0,
+            yaxis:6,
+          color: "rgb(51,15,255)"
+            },       
+         
+            "reminderPlayed": {
+            label: json.reminderPlayedLabel,
+            data: json.reminderPlayed,
+            shadowSize: 0,
+            color: "rgb(255,102,0)",
+             points: {show: true, radius: 5, symbol: "cross" }         
+           
+            },
+            "userEventAwake": {
+            label: json.userEventAwakeLabel,
+            data: json.userEventAwake,
+            shadowSize: 0,
+            color: 6,
+            points: {show: true, radius: 5, symbol: "circle" },
+         
+            },
+            "userEventDream": {
+            label: json.userEventDreamLabel,
+            data: json.userEventDream,
+            shadowSize: 0,
+            color:7,
+           points: {show: true, radius: 5, symbol: "triangle" },
+            },
+            "userEventLucidDream": {
+            label: json.userEventLucidDreamLabel,
+            data: json.userEventLucidDream,
+            shadowSize: 0,
+            color: 8,
+            points: {show: true, radius: 5, symbol: "square" },
+          
+            },
+            "userEvent": {
+            label: json.userEventLabel,
+            data: json.userEvent,
+            shadowSize: 0,
+            color: 9,
+           points: { show: true, radius: 5,symbol: "diamond" },
+          
+            },
+            
+            
+    };
+    
+  
+
+   
+    
+    // insert checkboxes 
+    var choiceContainer = $("#choices");
+    $.each(datasets, function(key, val) {
+     //<br/><br/>
+       if(val.label === undefined){}
+     else{
+        choiceContainer.append('<input type="checkbox" name="' + key +
+                               '" checked="checked" id="id' + key + '">' +
+                               '<label for="id' + key + '">'
+                                + val.label + '</label>'+"    ");
+                                }//end else
+    });
+    choiceContainer.find("input").click(plotAccordingToChoices);
+
+
+    $("#placeholder").bind("plotclick", function (event, pos, item) {
+       
+       
+        if (item) {
+          $("#message").text("Selected: "+item.series.label+ " minute: "+item.dataIndex+" [Timestamp, Value]: ["+item.datapoint+"]");
+        //  $("#message").text("Selected: "+item.series.label+ " minute: "+(pos.x-json.firstTimestamp)/60000+" Value: "+datapoint);
+          // $("#message").text("totalSleep: "+json.sleepDuration+" json.numberOfEpochs["+json.numberOfEpochs+"]");
+       }
+    });
+
+
+
+var plot; 
+  
+    function plotAccordingToChoices() {
+        var data = [];
+
+        choiceContainer.find("input:checked").each(function () {
+            var key = $(this).attr("name");
+            if (key && datasets[key])
+                data.push(datasets[key]);
+        });
+
+        if (data.length > 0)
+          plot = $.plot($("#placeholder"), data, {
+         //       yaxis: { min: 0 },
+                legend: {show:true, container: $("#legend"),noColumns: 9  },
+              	yaxes: [ {show:false},//axis1 
+              	//axis 2 is log scale
+              	 { position: "right",max: activityCountYMax,
+              	// transform: function (v) { //need a function to cut off excessive motion
+		          //    	 if(v>1){return 10*Math.log(v)/Math.log(10);} //10 log 10 is dB
+		            //  	 else{ return 0;}
+              	   //},
+              	// inverseTransform: function (v) { return 10^(v/10);}
+              	 },
+              	 {max: sleepScoreYMax},{},//axis 3 and 4  
+              	 {show:false},{show:false}],//axis 5 and 6 
+                xaxis: {mode: "time", timeformat: "%H:%M",},
+                grid: {clickable: true, color:"#FFFFFF"},
+                
+            });
+            
+    }
+    
+    
+    
+    
+    //pie chart data
+   	var data = [];
+	
+	//data[i] = { label: "Series"+(i+1), data: Math.floor(Math.random()*100)+1 }
+	
+	//data[0]={ label: "Total Sleep",json.totalSleepDuration.length };
+	//data[1]={ label: "Restful Sleep", json.totalSleepDuration.length-100 };
+	var diff;
+	if(json.totalTimeInBed-json.totalMinutesAsleep>0){
+		diff = json.totalTimeInBed-json.totalMinutesAsleep; 
+	}else{diff = 0;}
+	
+	data[0]={data:0};
+	data[1]={data:0};//to get the colors we need
+	data[2]={ label: "Non Restful Sleep", data: diff};
+	data[3]={ label: "Restful Sleep", data: json.totalMinutesAsleep};	
+	//data[0]={ label: "Total Sleep", data: 400 };
+	//data[1]={ label: "Time in Bed", data: 200 };
+	
+   
+   // GRAPH 4
+	$.plot($("#graph4"), data, 
+	{
+		series: {
+			pie: { 
+				show: true,
+				radius: 1,
+				label: {
+					show: true,
+					radius: 3/4,
+					formatter: function(label, series){
+						return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
+					},
+					background: { 
+						opacity: 0.5,
+						color: '#000'
+					}
+				}
+			}
+		},
+		legend: {
+			show: false
+		}
+	});
+	
+function updateStatistics(){
+
+
+$("#totalTimeInBed").text(json.totalTimeInBed+" min");
+$("#totalMinutesAsleep").text(json.totalMinutesAsleep+" min");
+$("#sleepOnsetLatency").text(json.sleepOnsetLatency+" min");
+$("#numberOfAwakenings").text(json.numberOfAwakenings);
+$("#longestSleepEpisode").text(json.longestSleepEpisode+" min");
+
+$("#numberOfUserEvents").text(json.numberOfUserEvents);
+$("#numberOfVoiceReminders").text(json.numberOfVoiceReminders);
+$("#numberOfDreams").text(json.numberOfDreams);
+$("#numberOfLucidDreams").text(json.numberOfLucidDreams);
+
+}
+
+function updateTitle(){
+$("#title").text(json.filename);
+}
+
+//TODO insert android picture here
+function updateAnalysis(){
+$("#analysis").text(""+json.analysis);
+}
+
+//update string values
+updateTitle();
+updateStatistics();
+updateAnalysis();
+
+//has to happen before interacting with axis
+  plotAccordingToChoices();
+    
+    //____________________Attempt to interact with axis
+        // now for each axis, create a div
+
+    function getBoundingBoxForAxis(plot, axis) {
+        var left = axis.box.left, top = axis.box.top,
+            right = left + axis.box.width, bottom = top + axis.box.height;
+
+        // some ticks may stick out, enlarge the box to encompass all ticks
+        var cls = axis.direction + axis.n + 'Axis';
+        plot.getPlaceholder().find('.' + cls + ' .tickLabel').each(function () {
+            var pos = $(this).position();
+            left = Math.min(pos.left, left);
+            top = Math.min(pos.top, top);
+            right = Math.max(Math.round(pos.left) + $(this).outerWidth(), right);
+            bottom = Math.max(Math.round(pos.top) + $(this).outerHeight(), bottom);
+        });
+        
+        return { left: left, top: top, width: right - left, height: bottom - top };
+    }
+    
+    $.each(plot.getAxes(), function (i, axis) {
+        if (!axis.show)
+            return;
+        
+        var box = getBoundingBoxForAxis(plot, axis);
+        
+        $('<div class="axisTarget" style="position:absolute;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>')
+            .data('axis.direction', axis.direction)
+            .data('axis.n', axis.n)
+            .css({ backgroundColor: "#f00", opacity: 0, cursor: "pointer" })
+            .appendTo(plot.getPlaceholder())
+            .hover(
+                function () { $(this).css({ opacity: 0.10 }) },
+                function () { $(this).css({ opacity: 0 }) }
+            )
+            .click(function () {
+          
+                
+            if(""+axis.direction + axis.n=="x1"){	
+           			 $("#message").text("Local time using 24 hour format");
+            }           
+                 if(""+axis.direction + axis.n=="y1"){	
+           			 $("#message").text("Mock axis for voice reminders (purple line), user events and sleep episodes (teal line)");
+            }            
+                 if(""+axis.direction + axis.n=="y4"){	
+           			 $("#message").text("Axis for total sleep duration (green line) in minutes");
+            } if(""+axis.direction + axis.n=="y3"){	
+           			 $("#message").text("Axis for  sleep score (red line). User is asleep when this score is less than 1");
+            } if(""+axis.direction + axis.n=="y2"){	
+           			 $("#message").text("Activity count (yellow line) in arbitrary units. Larger motions contribute more to this score than smaller ones");
+            }
+            
+            });
+    });
+    
+    //--------------------End attempt to interact with axis
+    
+
+  
+});
+</script>
+	
+ </body>
+</html>

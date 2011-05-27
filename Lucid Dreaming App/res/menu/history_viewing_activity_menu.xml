@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+	<item android:title="@string/menu_create_history" android:id="@+id/menu_history"
+		android:icon="@android:drawable/ic_menu_agenda"
+		android:titleCondensed="@string/menu_create_history"
+		android:alphabeticShortcut="c" android:numericShortcut="3"></item>
+
+	<item android:icon="@android:drawable/ic_menu_slideshow"
+		android:numericShortcut="1" android:alphabeticShortcut="l"
+		android:id="@+id/menu_load_data" android:titleCondensed="@string/menu_load"
+		android:title="@string/menu_load"></item>
+		
+		<item android:icon="@android:drawable/ic_menu_camera"
+		android:title="Screenshot" android:id="@+id/menu_screenshot"
+		android:numericShortcut="2" android:alphabeticShortcut="s" />
+
+	<item android:icon="@android:drawable/ic_menu_save" android:title="@string/menu_save_json"
+		android:id="@+id/menu_save_data" android:numericShortcut="7"
+		android:alphabeticShortcut="s" />
+	
+	<item android:icon="@android:drawable/ic_menu_search"
+		android:title="Change config" android:id="@+id/menu_change_config"
+		android:numericShortcut="0" android:alphabeticShortcut="p" />
+		<item android:icon="@android:drawable/ic_menu_preferences"
+		android:title="@string/menu_preferences" android:id="@+id/menu_preferences"
+		android:numericShortcut="0" android:alphabeticShortcut="p" />
+
+	<item android:icon="@android:drawable/ic_menu_help" android:title="@string/main_menu_help"
+		android:id="@+id/menu_help" android:numericShortcut="5"
+		android:alphabeticShortcut="h"></item>
+
+
+</menu>

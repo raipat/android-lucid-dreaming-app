@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Instructions</title>
+    <link href="layout.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    
+ </head>
+    <body>
+    <h1>Welcome to Graph Viewer!</h1>
+	Online Help: <a href="http://luciddreamingapp.com/help-how-to/analyze-data/">http://luciddreamingapp.com/help-how-to/analyze-data/</a></br></br>
+	This activitiy displays graphs of data that was collected overnight. Graphs become available after 8 minutes 
+	the app was running and may be autosaved every 10 minutes (if autosave option is enabled). You may manually save the graph before exiting the app.
+	
+	<h2>Usage</h2>
+	
+	Select "Load Graph" from the menu to view one of the graphs you have created. Graphs are stored in /Application Data/Lucid Dreaming App/Graph Data. 
+	Their file name includes the moment when you started the app. Pick one of the graphs to load it.
+	
+	<h2>Interacting with axis and points</h2>
+	Due to the small screen size, I'm including a lot of data in one plot. To ease the process of viewing, you can remove some data series from the graph
+	by using the checkboxes below the plot. Multiple axis are introduced due to different scales of data series displayed.
+	
+	The plot axis are not labelled to save space. If you click on an axis, it's description and units are shown below the graph. Clicking on a point displays its value and timestamp below the graph. I'm working on turning the timestamp into a date.
+	
+	<h2>Axis and series</h2>
+	<ul>
+	<li>Sleep score - Values less than 1 indicate sleep, otherwise awake</li>
+	<li>Sleep episodes - value of 0 indicates awake, 10 falling asleep and 20 asleep</li>
+	<li>Sleep duration rises with each minute you are asleep. This may be useful for estimating periods of sleep interruption</li>
+	<li>Reminder played - shows the minute when a reminder was played. This info may be helpful in gauging the effectiveness of the app</li>
+	<li>Awake, Dream, Lucid Dream, User Event - indicates minutes when the you interacted with the screen. These are shown as little ticks in the upper portion of the graph </li>
+	</ul>
+	
+	Ticks are color coded and shown in the legend. Here's what they stand for:
+	<ul>
+	<li>X = reminder played that minute.</li>
+		<li>O stands for both awake and no dream events</li>
+			<li>Triangle stands for regular dreams</li>
+				<li>Square stands for lucid dreams</li>
+					<li>Diamond stands for other events and screen interactions</li>
+	</ul>	
+	
+	
+	<h2>Sleep Statistics</h2>
+	Graphs include a statistical summary of that night's sleep. Here's the overview of some important metrics:
+	<ul>
+	<li>Sleep onset latency - time it takes to reach 5 consecutive minutes of sleep</li>
+	<li>Sleep score - a user is considered asleep if the sleep score is less than 1 on 5 consecutive minutes</li>
+	<li>Number of awakenings - number of times the app detected significant movement and think you were awake</li>
+	<li>Number of user events - number of minutes when you interacted with the screen (max 1/minute) </li>
+	<li>Longest sleep episode - longest period with sleep score of less than 1</li>
+	</ul>
+	
+	
+
+ </body>
+</html>
