@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.luciddreamingapp.beta"
+      android:versionCode="13"
+      android:versionName="0.7.3 Beta">   
+    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="4" />
+     <uses-permission android:name="android.permission.WAKE_LOCK" />
+     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+     <uses-permission android:name="android.permission.VIBRATE" />
+     
+       <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <application 
+    			android:label="@string/app_name" android:icon="@drawable/ic_launcher_lucid_dreaming_app_styled" android:name="GlobalApp">
+       
+       <!-- Collects actigraphy data (foreground service)--> 
+       <service android:name="com.luciddreamingapp.beta.util.ActigraphyService" />  
+       <!-- Monitors microphone level (foreground service) -->  
+       <service android:name="com.luciddreamingapp.beta.util.AudioAnalyzerService" />
+       
+       <!-- Uploads files to the server -->    
+       <service android:name="com.luciddreamingapp.beta.util.AutomaticUploaderService" />
+
+<!-- If this is uncommented, the receiver would be woken up for each new epoch event,
+instead, we register the receiver programmatically in the GlobalApp
+	<receiver android:name="com.luciddreamingapp.beta.actigraph.ActigraphReceiver">
+		<intent-filter>
+			<action android:name="com.luciddreamingapp.actigraph.NEW_EPOCH" />
+		</intent-filter>
+	</receiver>
+     -->   
+                  
+        <activity android:label="@string/app_name"
+         			android:name=".LucidDreamingApp"
+         			android:screenOrientation="landscape">
+		         	<intent-filter>
+		                <action android:name="android.intent.action.MAIN" />
+		                <category android:name="android.intent.category.LAUNCHER" />
+		            </intent-filter>
+         			</activity>
+         		<activity android:label="@string/select_file"
+                  android:theme="@android:style/Theme.Dialog"
+                  android:configChanges="orientation|keyboardHidden" android:name=".DataFileSelector"/>
+                  <activity android:label="@string/select_file"
+                  android:theme="@android:style/Theme.Dialog"
+                  android:configChanges="orientation|keyboardHidden" android:name=".Mp3FileSelector"/>
+                  
+        <activity
+        android:name=".Preferences"
+        android:label="@string/set_preferences"
+       >
+		</activity>
+
+				<activity
+        android:name=".SensorCalibrationPreference"
+        android:label="@string/set_preferences"
+        android:screenOrientation="landscape">
+		</activity>
+
+			<activity
+        android:name=".InMotionCalibration"
+        android:label="Accelerometer Calibration"
+        android:screenOrientation="landscape">
+		</activity>
+		
+		<activity
+        android:name=".CalibrationWithService"
+        android:label="Accelerometer Calibration"
+        android:screenOrientation="landscape">
+		</activity>
+		
+
+		<activity
+        android:name=".HelpActivity"
+        android:label="Lucid Dreaming App Help"
+       ></activity>
+       <activity
+        android:name=".TestActivity"
+        android:label="Various UI tests"
+       ></activity>
+        <activity
+        android:name=".EventEditorActivity"
+        android:label="Event Editor"
+       ></activity>
+       
+       	<activity
+        android:name=".LucidLabActivity"
+        android:label="Lucid Dreaming Lab"
+       ></activity>
+       
+		
+		<activity
+        android:name=".GraphViewingActivity"
+        android:label="Graph Viewing Activity"
+        android:screenOrientation="landscape">
+		</activity>
+		
+		<!-- This graph activity is updated every minute at night -->		
+		<activity
+        android:name=".RealTimeGraphActivity"
+        android:label="@string/app_name"
+        android:screenOrientation="landscape">
+		</activity>
+		<!-- This List is updated every minute at night -->		
+		<activity
+        android:name=".RealTimeListActivity"
+        android:label="@string/app_name"
+        android:screenOrientation="landscape">
+		</activity>
+		
+		
+		<activity
+        android:name="com.luciddreamingapp.beta.util.state.SmartTimerActivity"
+        android:label="Smart Timer Activity"   >     
+		</activity>
+		<activity
+        android:name=".Strobe"
+        android:label="Lucid Dreaming App Strobe"
+        android:screenOrientation="landscape"
+       ></activity>
+		
+		<activity
+        android:name=".HistoryViewingActivity"
+        android:label="History Viewing Activity"
+        android:screenOrientation="landscape">
+		</activity>
+		
+		
+		
+		        <activity android:label="Lucid Dreaming App"
+         			android:screenOrientation="landscape"
+         			 android:name=".AccelerometerMonitoringActivity"/>
+         			
+         			 <activity android:label="Lucid Dreaming App"
+         			android:screenOrientation="landscape"
+         			 android:name=".NightGUIActivity"/>
+         			
+         	<!-- Activities from gesture builder -->		
+     		<activity
+            android:name="com.luciddreamingapp.beta.util.gesturebuilder.GestureBuilderActivity"
+            android:label="@string/application_name">
+
+          
+
+        </activity>
+
+        <activity
+            android:name="com.luciddreamingapp.beta.util.gesturebuilder.CreateGestureActivity"
+            android:label="@string/label_create_gesture" />
+
+    </application>
+         			
+		
+
+   
+</manifest>

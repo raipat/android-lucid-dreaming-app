@@ -1,0 +1,269 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Sleep Data Viewer</title>
+    <link href="layout.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../jquery.min.js"></script>   
+    <script language="javascript" type="text/javascript" src="../jquery.flot.min.js"></script>
+     <script language="javascript" type="text/javascript" src="../jquery.flot.pie.min.js"></script>
+      <script language="javascript" type="text/javascript" src="../jquery.flot.symbol.min.js"></script>
+      
+    <script language="javascript" type="text/javascript" src="../jquery.flot.selection.min.js"></script>
+ </head>
+ <body><div id="placeholder" style="width:900px;height:120px;"></div>
+     <div style="float:left;width:900px;height:50px;border: 1px dashed gainsboro;" id="legend"></div>
+   
+<p><span id="message"></span></p>    
+  
+
+
+<script type="text/javascript">
+$(function () {
+
+var temp = window.javahandler.getJson1();
+var json = eval("(" + temp + ")");
+
+
+var activityCountYMax;
+ if(json.activityCountYMax === undefined){activityCountYMax=2500;}
+ else{
+ activityCountYMax= json.activityCountYMax;
+ }
+ 
+  var sleepScoreYMax;
+ if(json.sleepScoreYMax === undefined){sleepScoreYMax=35;}
+ else{
+ sleepScoreYMax= json.sleepScoreYMax;
+ }
+ 
+
+    var datasets = {
+        "active": {
+            label: json.activeLabel ,
+            data: json.active ,            
+            color: 3 ,
+           	points: {show: true, radius: 1},
+            },        
+         "inactive": {
+            label: json.inactiveLabel ,
+            data: json.inactive ,            
+             color: "rgb(205,201,201)" ,
+             points: {show: true, radius: 1},
+            },
+           "voiceReminder": {
+            label: json.voiceReminderLabel ,
+            data: json.voiceReminder ,           
+            color:2,
+            points: {show: true, radius: 5, symbol: "cross" }   
+            },             
+        "vibrateReminder": {
+            label: json.vibrateReminderLabel ,
+            data: json.vibrateReminder ,     
+            color:4,
+            points: {show: true, radius: 5, symbol: "cross" }   
+            },
+            "strobeReminder":{
+            label: json.strobeReminderLabel ,
+            data: json.strobeReminder ,           
+            color: 1 ,
+            points: {show: true, radius: 5, symbol: "cross" }   
+            },
+            
+            "fuzzyLogicMotion":{
+            label: json.fuzzyLogicMotionLabel ,
+            data: json.fuzzyLogicMotion ,            
+            color: "rgb(255,102,0)" ,
+             points: {show: true, radius: 1,}            
+            },  
+         
+         
+            "fuzzyLogicUserEvent": {
+            label: json.fuzzyLogicUserEventLabel,
+            data: json.fuzzyLogicUserEvent,
+            color: 0,
+             points: {show: true, radius: 1,}            
+               
+           
+            },
+            
+            
+    };
+    
+    
+  
+
+    // hard-code color indices to prevent them from shifting as
+    // countries are turned on/off
+    var i = 0;
+   // $.each(datasets, function(key, val) {
+  
+     //   val.color = i;
+     //   ++i;
+   // });
+  
+  //  choiceContainer.find("input").click(plotAccordingToChoices);
+
+
+    $("#placeholder").bind("plotclick", function (event, pos, item) {
+       
+       
+        if (item) {
+          $("#message").text("Selected: "+item.series.label+ " minute: "+item.dataIndex+" [Timestamp, Value]: ["+item.datapoint+"]");
+        //  $("#message").text("Selected: "+item.series.label+ " minute: "+(pos.x-json.firstTimestamp)/60000+" Value: "+datapoint);
+          // $("#message").text("totalSleep: "+json.sleepDuration+" json.numberOfEpochs["+json.numberOfEpochs+"]");
+       }
+    });
+
+
+
+var plot; 
+  
+    function plotAccordingToChoices() {
+        var data = [];
+
+
+
+$.each(datasets, function(key, val) {
+  if (key && datasets[key])
+                data.push(datasets[key]);
+       
+    });
+      
+
+        if (data.length > 0)
+          plot = $.plot($("#placeholder"), data, {
+         //       yaxis: { min: 0 },
+                legend: {show:true, container: $("#legend"),noColumns: 9  },
+              	yaxes: [ {show:false, min:12, max:20},//axis1 
+              	//axis 2 is log scale
+              	 { position: "right",max: activityCountYMax,
+              	// transform: function (v) { //need a function to cut off excessive motion
+		          //    	 if(v>1){return 10*Math.log(v)/Math.log(10);} //10 log 10 is dB
+		            //  	 else{ return 0;}
+              	   //},
+              	// inverseTransform: function (v) { return 10^(v/10);}
+              	 },
+              	 {max: sleepScoreYMax},{},//axis 3 and 4  
+              	 {show:false},{show:false}], //5 and 6
+                xaxis: {min: 0, mode: "time", timeformat: "%H:%M",},
+                grid: {clickable: true},
+                
+            });
+            
+    }
+    
+    
+    
+    
+   
+
+function updateTitle(){
+//$("#title").text(json.filename);
+}
+
+//TODO insert android picture here
+function updateAnalysis(){
+//$("#analysis").text(""+json.analysis);
+}
+
+//has to happen before interacting with axis
+  plotAccordingToChoices();
+    
+    //____________________Attempt to interact with axis
+        // now for each axis, create a div
+
+    function getBoundingBoxForAxis(plot, axis) {
+        var left = axis.box.left, top = axis.box.top,
+            right = left + axis.box.width, bottom = top + axis.box.height;
+
+        // some ticks may stick out, enlarge the box to encompass all ticks
+        var cls = axis.direction + axis.n + 'Axis';
+        plot.getPlaceholder().find('.' + cls + ' .tickLabel').each(function () {
+            var pos = $(this).position();
+            left = Math.min(pos.left, left);
+            top = Math.min(pos.top, top);
+            right = Math.max(Math.round(pos.left) + $(this).outerWidth(), right);
+            bottom = Math.max(Math.round(pos.top) + $(this).outerHeight(), bottom);
+        });
+        
+        return { left: left, top: top, width: right - left, height: bottom - top };
+    }
+    
+    $.each(plot.getAxes(), function (i, axis) {
+        if (!axis.show)
+            return;
+        
+        var box = getBoundingBoxForAxis(plot, axis);
+        
+        $('<div class="axisTarget" style="position:absolute;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>')
+            .data('axis.direction', axis.direction)
+            .data('axis.n', axis.n)
+            .css({ backgroundColor: "#f00", opacity: 0, cursor: "pointer" })
+            .appendTo(plot.getPlaceholder())
+            .hover(
+                function () { $(this).css({ opacity: 0.10 }) },
+                function () { $(this).css({ opacity: 0 }) }
+            )
+            .click(function () {
+          
+                
+            if(""+axis.direction + axis.n=="x1"){	
+           			 $("#message").text("Local time using 24 hour format");
+            }           
+                 if(""+axis.direction + axis.n=="y1"){	
+           			 $("#message").text("Mock axis for voice reminders (purple line), user events and sleep episodes (teal line)");
+            }            
+                 if(""+axis.direction + axis.n=="y4"){	
+           			 $("#message").text("Axis for total sleep duration (green line) in minutes");
+            } if(""+axis.direction + axis.n=="y3"){	
+           			 $("#message").text("Axis for  sleep score (red line). User is asleep when this score is less than 1");
+            } if(""+axis.direction + axis.n=="y2"){	
+           			 $("#message").text("Activity count (yellow line) in arbitrary units. Larger motions contribute more to this score than smaller ones");
+            }
+            
+            });
+    });
+    
+    //--------------------End attempt to interact with axis
+    
+
+  
+});
+</script>
+	<style type="text/css">
+		{
+		  font-family: sans-serif;
+		}
+		
+		body
+		{
+			padding: 0 1em 1em 1em;
+		}
+		
+		div.graph
+		{
+			width: 250px;
+			height: 250px;
+			float: left;
+			border: 1px dashed gainsboro;
+		}
+		
+		label
+		{
+		
+			
+		}
+
+		
+		
+		code b
+		{
+			color: black;
+		}
+		
+		
+	</style>
+ </body>
+</html>

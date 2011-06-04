@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+    
+    <TableLayout android:id="@+id/tableLayout1" android:layout_height="match_parent" android:layout_width="wrap_content">
+    <ImageView android:background="@drawable/back" android:src="@drawable/ic_launcher_lucid_dreaming_app_styled" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/imageView1"></ImageView>
+    <TextView  android:background="@drawable/back" android:text="Toast Text" android:id="@+id/textView1" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>   
+    </TableLayout>
+    
+  
+</LinearLayout>
