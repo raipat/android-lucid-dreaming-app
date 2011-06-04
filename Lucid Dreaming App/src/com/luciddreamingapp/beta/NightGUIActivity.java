@@ -339,7 +339,7 @@ public class NightGUIActivity extends Activity implements Interactive,OnGestureP
 	                startService(new Intent(this, AudioAnalyzerService.class));
 	            	
 	                
-	              //  startService(new Intent(this, ActigraphyService.class));
+	                startService(new Intent(this, ActigraphyService.class));
 	                
 	                
 	                

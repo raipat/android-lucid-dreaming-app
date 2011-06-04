@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
@@ -31,7 +34,6 @@ import com.google.gson.Gson;
 import com.luciddreamingapp.beta.GlobalApp;
 import com.luciddreamingapp.beta.HistoryViewingActivity;
 import com.luciddreamingapp.beta.LucidDreamingApp;
-import com.luciddreamingapp.beta.actigraph.parcels.ActigraphReceiver;
 import com.luciddreamingapp.beta.util.analysis.AnalysisDataPoint;
 import com.luciddreamingapp.beta.util.analysis.AnalysisNight;
 import com.luciddreamingapp.beta.util.analysis.AnalysisTester;
@@ -68,7 +70,7 @@ public class AutomaticUploaderService extends Service {
 	private List<File> graphList; //list of graphs available
 	
 	List<String> filepathList;//list of files to upload
-	
+	HashMap<String,String> uploadedFiles;//a mapping of graph name to temp file names
 	
 	UploadConfig config;
 	
@@ -90,12 +92,18 @@ public class AutomaticUploaderService extends Service {
 			Log.w(TAG, "connected:"+checkConnectionStatus());
 		}
 		 mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		 uploadedFiles = new HashMap<String,String>();
 	}
 
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		
+		if(receiver!=null){
+		unregisterReceiver(receiver);
+		}
+		
 		try{
 		if(timer!=null){
 			timer.cancel();
@@ -145,7 +153,20 @@ public class AutomaticUploaderService extends Service {
 			
 			
 		}
-		//intent with upload action, broadcast it
+		
+		//if there are files to upload
+		if(filepathList.size()>0){
+			
+			//listen to a broadcast notifying us that the data has been uploaded
+			filter = new IntentFilter("com.luciddreamingapp.uploader.UPLOAD_COMPLETE");
+			receiver = new SendCompletedReceiver();
+			
+			//connect the reciver and the filter
+			 registerReceiver(receiver, filter);
+			
+			
+			
+			//intent with upload action, broadcast it
 		Intent uploadIntent = new Intent("com.luciddreamingapp.uploader.START_UPLOAD");
 		String[] array = new String[filepathList.size()];
 		int counter = 0;
@@ -153,10 +174,20 @@ public class AutomaticUploaderService extends Service {
 			if(D)Log.v(TAG,s);
 			array[counter++] = s;
 		}
+		
+		
+		
 		uploadIntent.putExtra("filepaths",array);
+		uploadIntent.putExtra("uploader",3);
 		sendBroadcast(uploadIntent);
 
 		if(D)Log.e(TAG,"uploaded in: "+(System.currentTimeMillis()-timestamp)/1000+" sec" );
+		}else{
+			if(D)Log.e(TAG, "No files to upload");
+		
+			stopSelf();
+		}
+		
 		return true;
 		}catch(Exception e){
 			if(D)e.printStackTrace();
@@ -509,6 +540,9 @@ public class AutomaticUploaderService extends Service {
 	
 	String filename = LogManager.writeToAndZipFile(
 			LucidDreamingApp.UPLOAD_LOCATION, this.processName(f.getName()), nightJSON	);
+	
+	uploadedFiles.put(filename, f.getName());//map graph name value to temp file key
+	
 	if(D)Log.e(TAG, "saved:"+filename);
 	File temp = new File(filename);
 	
@@ -626,13 +660,7 @@ public class AutomaticUploaderService extends Service {
 			timer.schedule(new WatchDogTimer(), 600000);
 			//stopSelf();
 			
-			//listen to a broadcast notifying us that the data has been uploaded
-			filter = new IntentFilter("com.luciddreamingapp.uploader.UPLOAD_COMPLETE");
-			receiver = new SendCompletedReceiver();
-			
-			//connect the reciver and the filter
-			 registerReceiver(receiver, filter);
-			
+		
 			
 			
 		}
@@ -654,18 +682,39 @@ public class AutomaticUploaderService extends Service {
 	}
 	
 	
-	private class CleanUpTask extends AsyncTask<String[], Void, Void> {
+	private class CleanUpTask extends AsyncTask<Void, Void, Void> {
   		 
-		 protected Void doInBackground(String[]... urls) {
+		 protected Void doInBackground(Void... urls) {
 			
-			 //get a list of uploaded files, and delete them from the sdcard
-			 if(urls[0]!=null){
-			 String[] temp = urls[0];
-			 for(int i = 0; i<temp.length;i++){
-				 
-			 }
+			 if(D)Log.v(TAG, "cleanup task ");
+			 
+		
+			 for(int i = 0; i<filepaths.length;i++){
+				 if(D)Log.v(TAG, filepaths[i]);
+				 if(uploadedFiles.containsKey(filepaths[i])){
+					 if(D)Log.v(TAG, "contains: true");
+					 //remember the graph name that was uploaded
+					 config.getFilenames().add(uploadedFiles.get(filepaths[i]));
+					 
+					 //delete the temporary file
+					 File f = new File(filepaths[i]);
+					 f.delete();				 
+					 
+					 
+				 }
 			 
 			 }
+			 			
+			 //get a list of uploaded files, and delete them from the sdcard
+//			 if(urls[0]!=null){
+//			 String[] temp = urls[0];
+//			 for(int i = 0; i<temp.length;i++){
+//				 if(D)Log.v(TAG, "Received: "+temp[i]);
+//				 
+//				 if(D)Log.w(TAG,"map: "+uploadedFiles.get(temp[i]));
+//			 	}
+//			 
+//			 }
 	        return null;
 	     }
 
@@ -745,13 +794,28 @@ public class AutomaticUploaderService extends Service {
 		
 	}
 	
+	
+	String[] filepaths;
+	
 	class SendCompletedReceiver extends BroadcastReceiver{
 
 		@Override
-		public void onReceive(Context arg0, Intent arg1) {
+		public void onReceive(Context arg0, Intent intent) {
 			// TODO Auto-generated method stub
+			if(D)Log.e(TAG,"Received broadcast");
 			
-			new CleanUpTask().execute(null);
+			Bundle extras =	intent.getExtras();
+			
+			//get the list of uploaded files and remember it
+			if(extras!=null){
+				filepaths = extras.getStringArray("filepaths");
+				
+				new CleanUpTask().execute(null);
+			}else{
+				stopSelf();
+			}
+			
+		
 			
 		}
 		
