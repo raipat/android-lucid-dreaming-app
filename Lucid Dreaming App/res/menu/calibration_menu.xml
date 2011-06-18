@@ -24,6 +24,12 @@
 		android:titleCondensed="@string/menu_start_extended_calibration"></item>
 
 
+	<item android:icon="@drawable/ic_menu_preferences"
+		android:id="@+id/menu_adjust_r" android:title="Adjust R"
+		android:titleCondensed="Adjust R"></item>
+		
+
+
 	<item android:icon="@android:drawable/ic_menu_close_clear_cancel"
 		android:title="@string/menu_cancel_calibration" android:id="@+id/menu_cancel_calibration"></item>
 

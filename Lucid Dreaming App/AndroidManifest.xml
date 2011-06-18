@@ -8,18 +8,30 @@
      <uses-permission android:name="android.permission.WRITE_SETTINGS" />
      <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
      <uses-permission android:name="android.permission.VIBRATE" />
+     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+      <uses-permission android:name="android.permission.BLUETOOTH" />
+      
      
        <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <application 
     			android:label="@string/app_name" android:icon="@drawable/ic_launcher_lucid_dreaming_app_styled" android:name="GlobalApp">
        
        <!-- Collects actigraphy data (foreground service)--> 
-       <service android:name="com.luciddreamingapp.beta.util.ActigraphyService" />  
+       <service android:name="com.luciddreamingapp.actigraph.ActigraphyService" />  
        <!-- Monitors microphone level (foreground service) -->  
        <service android:name="com.luciddreamingapp.beta.util.AudioAnalyzerService" />
        
        <!-- Uploads files to the server -->    
        <service android:name="com.luciddreamingapp.beta.util.AutomaticUploaderService" />
+
+
+  <!-- Listens to intents to start the service, starts it if it is not running -->   
+    <receiver android:name="com.luciddreamingapp.actigraph.ServiceStarter">
+		<intent-filter>
+			<action android:name="com.luciddreamingapp.actigraph.START_ACTIGRAPHY_SERVICE" />
+		</intent-filter>
+	</receiver>
+
 
 <!-- If this is uncommented, the receiver would be woken up for each new epoch event,
 instead, we register the receiver programmatically in the GlobalApp
@@ -48,9 +60,13 @@ instead, we register the receiver programmatically in the GlobalApp
         <activity
         android:name=".Preferences"
         android:label="@string/set_preferences"
-       >
-		</activity>
-
+       />
+       
+         <activity
+        android:name=".QuickstartActivity"
+        android:label="Quickstart Activity"
+       />
+       
 				<activity
         android:name=".SensorCalibrationPreference"
         android:label="@string/set_preferences"
@@ -62,6 +78,13 @@ instead, we register the receiver programmatically in the GlobalApp
         android:label="Accelerometer Calibration"
         android:screenOrientation="landscape">
 		</activity>
+		
+					<activity
+        android:name="com.luciddreamingapp.actigraph.Calibration"
+        android:label="Accelerometer Calibration"
+        android:screenOrientation="landscape">
+		</activity>
+		
 		
 		<activity
         android:name=".CalibrationWithService"

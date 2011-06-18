@@ -2,6 +2,7 @@ package com.luciddreamingapp.beta;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Application;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,12 +29,13 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.luciddreamingapp.actigraph.ActigraphyService;
 import com.luciddreamingapp.beta.actigraph.parcels.ActigraphReceiver;
-import com.luciddreamingapp.beta.util.ActigraphyService;
 import com.luciddreamingapp.beta.util.JSONLoader;
 import com.luciddreamingapp.beta.util.MorseCodeConverter;
 import com.luciddreamingapp.beta.util.SleepAnalyzer;
@@ -45,12 +48,14 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	private static final String TAG = "Global Lucid Dreaming App";
 	private static final boolean D = false;//debug
 	
+	private static final boolean BRACELET_DEBUG = true;
 		
 	private int userEvent = 0;
 	String accelerometerAccuracy ="";
 	
 	private SleepDataManager dataManager;
 	private SleepAnalyzer sleepAnalyzer;
+	private SmartTimer smartTimer;
 
 	private int epochCount;
 	
@@ -93,6 +98,7 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 		
 		SleepDataManager.globalApp = this;
 		sleepAnalyzer = SleepAnalyzer.getInstance();
+		if(D)sleepAnalyzer.describeSettings(D); //print out all configuration parameters
 		sleepAnalyzer.setDataManager(dataManager);
 		
 		prefs = PreferenceManager
@@ -144,12 +150,12 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 
 	
 
-
-	public void addEpoch(int epoch,long timestamp){
-		Log.e("Global App", "received "+epoch+ " at "+timestamp);
-		map.put(epoch, timestamp);
-		//implement producer - consumer pattern with a thread waking up every so many seconds to check if data is available. 
-	}
+//
+//	public void addEpoch(int epoch,long timestamp){
+//		Log.e("Global App", "received "+epoch+ " at "+timestamp);
+//		map.put(epoch, timestamp);
+//		//implement producer - consumer pattern with a thread waking up every so many seconds to check if data is available. 
+//	}
 	
 	//returns the database key(timestamp) for the given epoch
 	public Long getEpoch(int epoch){
@@ -206,6 +212,12 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 			if(epoch!=null){
 		epoch.setUserEvent(userEvent);
 		userEvent = 0;
+		//notify smart timer
+		if(smartTimer!=null){
+			smartTimer.dataPointAdded(epoch);
+		}
+		
+		
 		dataManager.addSleepDataPoint(epoch);
 		if(D)Log.w(TAG, epoch.toDetailedString());
 		
@@ -227,7 +239,7 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	}
 
 	protected void setupDefaultSharedPreferences(SharedPreferences prefs){
-		
+
 		autoSaveEnabled  = prefs.getBoolean("graph_data_autosave_pref",true);
 		
 		dataManager.setActivityCountYMax(prefs.getInt("activity_count_y_axis_max", 2500));
@@ -238,7 +250,7 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 		sleepAnalyzer.setRemPredictionActivityThreshold(prefs.getInt("minimum_reminder_spacing", 15));
 		
 		
-		sleepAnalyzer.setEnableREMPrediction(prefs.getBoolean("enable_smart_timer", false));
+		sleepAnalyzer.setEnableREMPrediction(prefs.getBoolean("enable_smart_timer", true));
 	      sleepAnalyzer.setPlayLateReminders(prefs.getBoolean("play_sound_pref_non_rem", true));
 	        
 	      sleepAnalyzer.setEarliest120(prefs.getInt("deep_sleep_120_earliest", 45));
@@ -284,9 +296,15 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	
 	
 	protected void setupSmartTimer(String configFilepath){
-		 SmartTimer smartTimer =new SmartTimer(Calendar.getInstance().getTime().toLocaleString(),configFilepath);
+		
+//		if(sleepAnalyzer.getSmartTimer()!=null){
+//			dataManager.unregisterObserver(sleepAnalyzer.getSmartTimer(), SleepDataManager.DATA_POINT_ADDED);
+//		}
+		 smartTimer =new SmartTimer(Calendar.getInstance().getTime().toLocaleString(),configFilepath);
 		 smartTimer.setGlobalApp(this);
 		sleepAnalyzer.setSmartTimer(smartTimer);
+		//start responding to new data points in real time
+//		dataManager.addObserver(smartTimer, SleepDataManager.DATA_POINT_ADDED);
 	}
 	
 	@Override
@@ -370,8 +388,76 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 			
 		}	  
 	    
+	 /**Turns off bluetooth, making a bluetooth enabled bracelet vibrate 
+	  * re-enables bluetooth after 15 seconds.
+	  *  
+	  */
+	  public void braceletVibrate(){
+		  try{
+		  
+		handler.post(new Runnable(){
+			
+			
+			public void run(){
+				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
+				if (mBluetoothAdapter.isEnabled()) {
+					mBluetoothAdapter.disable();	
+					
+					handler.postDelayed(new Runnable(){
+						
+						
+						public void run(){
+							 if(D)Log.w(TAG, "Resuming bluetooth");
+							BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
+							if (mBluetoothAdapter.isEnabled()) {
+								mBluetoothAdapter.disable();	
+							
+								
+							}else{
+								//in case there's an error enabling the adapter
+								mBluetoothAdapter.enable();
+							
+							
+							}
+						}
+						
+					},10000)	;
+					
+				}else{
+					//in case there's an error enabling the adapter
+					mBluetoothAdapter.enable();
+				
+				
+				}
+			}
+			
+		})	;
+  	
+		  }catch(Exception e){
+			  if(D)e.printStackTrace();
+		  }
+	  }
+	  
+	  
+	  
+	  private class BluetoothVibrateRunnable implements Runnable{
+			 public void run(){
+				try{
+				 BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
+					mBluetoothAdapter.enable();
+				}catch(Exception e){
+					if(D)e.printStackTrace();
+				}
+			 }
+		 }
+	  
 	    public void startVibrateInteraction(long[] pattern){
-
+//	    	if (BRACELET_DEBUG){
+//	    		braceletVibrate();
+//	    		return;
+//	    	}
+//	    	
+	    	
 	    	//trying to fix sound not playing bug
 			SharedPreferences prefs = PreferenceManager
 	        .getDefaultSharedPreferences(getBaseContext());
@@ -381,7 +467,7 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	    	if(playSoundReminders){
 			//long[] pattern = MorseCodeConverter.pattern(message,300);
 //
-//			System.out.println(Arrays.toString(pattern));
+	    		if(D)System.out.println(Arrays.toString(pattern));
 //			Intent strobeIntent = new Intent(this, Strobe.class);
 //  		strobeIntent.putExtra("strobeTiming", pattern);
 //  		startActivity(strobeIntent);
@@ -411,12 +497,15 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 		}
 
 
+		
+
 
 		@Override
 		public void startInteraction() {
-			// TODO Auto-generated method stub
+			
 			startInteraction(mp3reminderFilepath);
 		}
+
 
 
 
@@ -447,6 +536,13 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 		        	mp.start();	
 		        	if(D)Log.e(TAG, "Sound played: "+filepath);
 	        	}else{
+	        		
+	        		//throw exception to mask media player error codes if file is not present!
+	        		if(!(new File(filepath)).exists()){
+	        			throw new Exception("File not found");
+	        		}
+	        		
+	        		
 	        	mp = new MediaPlayer();		        	
 	        	mp.setDataSource(filepath);
 	        	mp.prepare();
@@ -455,8 +551,21 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	        	}
 	        }
 	        }catch(Exception e){
-	        if(D){ Log.w(TAG,"Start PlaybackException!\n"+e.getMessage());
-	        e.printStackTrace();}
+	       if(D){ Log.w(TAG,"Start PlaybackException!\n"+e.getMessage());
+	        e.printStackTrace();
+	       }
+	        //play default alarm instead
+	        try{
+	        
+	        	MediaPlayer player = MediaPlayer.create(this,
+	    			    Settings.System.DEFAULT_ALARM_ALERT_URI);
+	    			player.start();
+	        }catch(Exception ee){
+	        	
+	        }
+	        
+	        
+	        
 	        }	 
 		}
 	
@@ -466,6 +575,8 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 		 handler.post(new VoiceRunnable(filepath));
 		 
 	 }
+	 
+	
 	 
 	 private class VoiceRunnable implements Runnable {
 		 final String filepath;
@@ -489,6 +600,11 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 		 }
 		 @Override
 		 public void run(){
+			 
+			 //send a broadcast in case there's a vibration bracelet:
+			 Intent intent = new Intent("com.luciddreamingapp.beta.START_BRACELET_VIBRATION");
+			 sendBroadcast(intent);
+			 
 			 new VibrateTask().execute(timing, null,null);
 		 }
 	 }
@@ -531,7 +647,7 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	     }
 
 	     protected void onPostExecute() {
-	         
+	    		
 	     }
 	 }
 	 
@@ -539,14 +655,14 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	     
 		 protected Void doInBackground(long[]... urls) {
 			   if(D)Log.e(TAG, "vibrate task executing");
-		       if(GlobalApp.this.guiActivity!=null){ 
+		      
 			   Intent strobeIntent = new Intent(GlobalApp.this, Strobe.class);
 		        
 		        strobeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);		     
 
         		strobeIntent.putExtra("strobeTiming", urls[0]);
         		startActivity(strobeIntent);
-		       }
+		       
 	        return null;
 	     }
 
@@ -637,6 +753,5 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	    }
 	
 
-	
 	   
 }

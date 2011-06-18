@@ -59,6 +59,10 @@ public class ActigraphReceiver extends BroadcastReceiver  {
 			dataPoint.setActivityCount(b.getInt(s_xActivityCount)
 					+b.getInt(s_yActivityCount)
 					+b.getInt(s_zActivityCount));
+			dataPoint.setXActivityCount(b.getInt(s_xActivityCount));
+			dataPoint.setYActivityCount(b.getInt(s_yActivityCount));
+			dataPoint.setZActivityCount(b.getInt(s_zActivityCount));
+			dataPoint.setAccelerometerAccuracy(b.getString("accuracy"));
 			
 			parent.processData(dataPoint);
 		

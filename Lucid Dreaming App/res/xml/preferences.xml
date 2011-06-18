@@ -53,7 +53,7 @@
 			android:key="rem_prediction_activity_threshold"
 				
 			android:max="50" 
-			android:defaultValue="10"
+			android:defaultValue="8"
 			 />
 			
 			</PreferenceScreen>
@@ -408,7 +408,7 @@
 			android:key="brightness_level" 
 			android:dependency="enable_screen_brightness_adjustment"
 		
-				android:defaultValue="10" 
+				android:defaultValue="1" 
 				android:max="100"
 			/>
 	

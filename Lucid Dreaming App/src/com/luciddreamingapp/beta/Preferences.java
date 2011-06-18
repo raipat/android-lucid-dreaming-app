@@ -20,6 +20,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.luciddreamingapp.actigraph.Calibration;
 import com.luciddreamingapp.beta.util.ColorPickerDialog;
 import com.luciddreamingapp.beta.util.gesturebuilder.GestureBuilderActivity;
 import com.luciddreamingapp.beta.util.state.SmartTimerActivity;
@@ -470,7 +471,7 @@ public class Preferences extends PreferenceActivity  implements ColorPickerDialo
                                         	int  accelerometer_calibration_duration_min = prefs.getInt("accelerometer_calibration_duration_min", 15);
                                         	sendToast("Calibration duration : "+accelerometer_calibration_duration_min+" min");
                                         //	Intent calibrateAccelerometerIntent = new Intent(context, InMotionCalibration.class);
-                                        	Intent calibrateAccelerometerIntent = new Intent(context, InMotionCalibration.class);
+                                        	Intent calibrateAccelerometerIntent = new Intent(context, Calibration.class);
                                         	calibrateAccelerometerIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                             calibrateAccelerometerIntent.putExtra("accelerometer_calibration_duration_min", accelerometer_calibration_duration_min);
                                             

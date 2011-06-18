@@ -903,7 +903,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
     
     case REQUEST_EDIT_EVENT:
     
-    	new GUITask().execute(null);
+   // 	new GUITask().execute(null);
     	
     currentVO = sleepCycleEventVO;
     listAdapter.notifyDataSetChanged();

@@ -31,12 +31,12 @@ import com.luciddreamingapp.beta.util.state.WILDEventVO;
 
 public class EventEditorActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String TAG = "EventEditor";
-	public static final boolean D = false;
+	public static final boolean D = true;
 
 	public static final int START_TIME_DIALOG_ID =1;
 	public static final int DURATION_TIME_DIALOG_ID =2;
 	
-	
+private GlobalApp A;
 	private SleepCycleEventVO vo;
 	
 	
@@ -53,6 +53,7 @@ public class EventEditorActivity extends PreferenceActivity implements OnSharedP
 	
 		super.onCreate(savedInstanceState);
 		
+		A = (GlobalApp)getApplication();
 		
 		if(SmartTimerActivity.sleepCycleEventVO==null){
 			finish();
@@ -90,7 +91,6 @@ public class EventEditorActivity extends PreferenceActivity implements OnSharedP
 			editor.putInt("flashDotDuration", vo.flashDotDuration);
 			
 			
-		
 			editor.commit();
 			
 			}catch(Exception e){
@@ -497,23 +497,28 @@ public class EventEditorActivity extends PreferenceActivity implements OnSharedP
 	    private class VoiceTask extends AsyncTask<String, Void, Void> {
 		     protected Void doInBackground(String... urls) {
 		        if(D)Log.e(TAG, "voice task executing");
+		        
+		     
 		        try{
 		        	if(vo.useVoiceReminder){
-					  if( mp!=null && mp.isPlaying()){
-					        	try{	
-					        		mp.stop();
-					        		mp.reset();
-					        		mp.release();}catch(Exception e){}		        		
-						        	mp = new MediaPlayer();
-					        		mp.setDataSource(vo.reminderFilepath);
-						        	mp.prepare();
-						        	mp.start();	
-					        	}else{
-					        	mp = new MediaPlayer();		        	
-					        	mp.setDataSource(vo.reminderFilepath);
-					        	mp.prepare();
-					        	mp.start();			        	
-					        	}
+		        		
+		        		   A.voiceInteractAsync(vo.reminderFilepath);
+		        		
+//					  if( mp!=null && mp.isPlaying()){
+//					        	try{	
+//					        		mp.stop();
+//					        		mp.reset();
+//					        		mp.release();}catch(Exception e){}		        		
+//						        	mp = new MediaPlayer();
+//					        		mp.setDataSource(vo.reminderFilepath);
+//						        	mp.prepare();
+//						        	mp.start();	
+//					        	}else{
+//					        	mp = new MediaPlayer();		        	
+//					        	mp.setDataSource(vo.reminderFilepath);
+//					        	mp.prepare();
+//					        	mp.start();			        	
+//					        	}
 		        	}
 					        }catch(Exception e){
 					       // 	sendShortToast("Unable to play file");
@@ -531,6 +536,7 @@ public class EventEditorActivity extends PreferenceActivity implements OnSharedP
 		 private class VibrateTask extends AsyncTask<long[], Void, Void> {
 		     protected Void doInBackground(long[]... urls) {
 		        if(D)Log.e(TAG, "vibrate task executing");
+		      
 		        if(vo.useVibrateReminder && vo.vibrateMessage!=null && !vo.vibrateMessage.equals("")){
 		        	
 		        	  long temp = 10;
@@ -540,8 +546,11 @@ public class EventEditorActivity extends PreferenceActivity implements OnSharedP
 
 			          // Start the vibration. Requires VIBRATE permission
 					 // sendToast("Vibrating :"+vo.vibrateMessage);
-			          Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-			          vibrator.vibrate(pattern, -1);
+					  
+					  A.vibrateInteractAsync(pattern);
+					  
+//			          Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+//			          vibrator.vibrate(pattern, -1);
 			         
 				  }else {
 					//  sendShortToast("No text to vibrate");
@@ -562,10 +571,14 @@ public class EventEditorActivity extends PreferenceActivity implements OnSharedP
 					   //if the user sets the seekbar to 0, avoid that
 					   long temp = 10;
 					   if(vo.flashDotDuration>1)temp =vo.flashDotDuration; 
-			        Intent strobeIntent = new Intent(EventEditorActivity.this, Strobe.class);
-	        		strobeIntent.putExtra("strobeTiming", MorseCodeConverter.pattern(vo.flashMessage,temp));
-
-	        		startActivity(strobeIntent);
+					   
+					   A.strobeInteractAsync(MorseCodeConverter.pattern(vo.flashMessage,temp));
+					   
+//					   
+//			        Intent strobeIntent = new Intent(EventEditorActivity.this, Strobe.class);
+//	        		strobeIntent.putExtra("strobeTiming", MorseCodeConverter.pattern(vo.flashMessage,temp));
+//
+//	        		startActivity(strobeIntent);
 				   }
 		        return null;
 		     }

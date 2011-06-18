@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
+  style="@android:style/ButtonBar"
   android:layout_width="match_parent"
   android:layout_height="match_parent" android:id="@+id/main_menu_layout"
   android:background ="@drawable/main_menu_graphic"
-  android:orientation="horizontal">
-    
-   
-        <ImageButton 
-         
-        android:id="@+id/start_button" android:layout_width="wrap_content" android:background ="@drawable/ic_launcher_lucid_dreaming_app_styled" android:layout_height="wrap_content"></ImageButton>
+  android:orientation="vertical">
+
+
+
+
+
+
+	<ImageButton android:id="@+id/start_button"
+		android:layout_width="wrap_content" android:background="@android:drawable/ic_menu_recent_history"
+		android:layout_height="wrap_content"></ImageButton>
+		
+			<ImageButton android:paddingTop="50dip" android:id="@+id/info_button"
+		android:layout_width="wrap_content" android:background="@drawable/ic_menu_info"
+		android:layout_height="wrap_content"></ImageButton>
        
- 
-          
+              
+
+	<ImageButton android:id="@+id/config_button"
+		android:layout_width="wrap_content" android:background="@drawable/ic_menu_preferences"
+		android:layout_height="wrap_content" android:paddingTop="50dip"></ImageButton>
+
+
      
 </LinearLayout>

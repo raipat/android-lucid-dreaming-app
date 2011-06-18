@@ -3,34 +3,27 @@ package com.luciddreamingapp.beta;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.gesture.Gesture;
-import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.gesture.GestureOverlayView.OnGesturePerformedListener;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.webkit.WebView;
 
-import com.luciddreamingapp.beta.RealTimeGraphActivity.UpdateRunnable;
-import com.luciddreamingapp.beta.util.ActigraphyService;
 import com.luciddreamingapp.beta.util.DataManagerObserver;
 import com.luciddreamingapp.beta.util.SleepDataManager;
 import com.luciddreamingapp.beta.util.SleepDataPoint;
-import com.luciddreamingapp.beta.util.gesturebuilder.GestureBuilderActivity;
 
 public class RealTimeListActivity extends Activity implements OnGesturePerformedListener,OnSharedPreferenceChangeListener,DataManagerObserver {
 	

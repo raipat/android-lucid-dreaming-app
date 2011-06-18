@@ -15,11 +15,12 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.luciddreamingapp.beta.GlobalApp;
-import com.luciddreamingapp.beta.Interactive;
+import com.luciddreamingapp.beta.util.DataManagerObserver;
 import com.luciddreamingapp.beta.util.JSONLoader;
 import com.luciddreamingapp.beta.util.MorseCodeConverter;
+import com.luciddreamingapp.beta.util.SleepDataPoint;
 
-public class WILDTimer {
+public class WILDTimer implements DataManagerObserver {
 
 	private static final boolean D = false;//debug
 	private static final String TAG = "WILD Timer";
@@ -28,6 +29,8 @@ public class WILDTimer {
 	private Activity activityParent = null;
 	private List<WILDEventVO> list;
 	private Timer wildTimer;
+	
+	private SleepDataPoint epoch;
 	
 	private String configFilepath;
 	
@@ -110,9 +113,19 @@ public class WILDTimer {
 				
 		@Override
 		public void run() {
+			//do nothing if the app crashed
+			if(parent==null)return;
+			
+			boolean reminderPlayed = false;
 			if(vo.useVoiceReminder &&vo.reminderFilepath!=null){
 				if(D)Log.w(TAG,"starting voice Interaction "+vo.reminderFilepath);
+				{				
 				parent.voiceInteractAsync(vo.reminderFilepath);
+				reminderPlayed = true;
+				}
+				
+			}
+				
 			
 			if(vo.useVibrateReminder && vo.vibrateMessage!=null&& !vo.vibrateMessage.equals("")){
 				
@@ -122,6 +135,7 @@ public class WILDTimer {
 				   if(vo.vibrateDotDuration>1)temp =vo.vibrateDotDuration; 
 				   if(D)Log.w(TAG,"starting vibrate Interaction: "+temp+" vibrate message"+vo.vibrateMessage );
 				   parent.vibrateInteractAsync(MorseCodeConverter.pattern(vo.vibrateMessage, temp));
+				   reminderPlayed = true;
 			
 			}
 			if(vo.useStrobe &&vo.flashMessage!=null &&!vo.flashMessage.equals("")){
@@ -129,10 +143,18 @@ public class WILDTimer {
 				   if(vo.flashDotDuration>1)temp =vo.flashDotDuration; 
 				   if(D)Log.w(TAG,"starting strobe Interaction: "+temp+" strobe message"+vo.flashMessage );
 				   parent.strobeInteractAsync(MorseCodeConverter.pattern(vo.flashMessage, temp));
+				   reminderPlayed = true;
 			
 			}
 			
+			
+			if(reminderPlayed&& epoch!=null){
+				epoch.setReminderPlayed(true);
+				int temp =epoch.getHistoryStatistics().getNumberOfVoiceReminders();
+				epoch.getHistoryStatistics().setNumberOfVoiceReminders(temp+1);
 			}
+			
+			
 		}
 		
 	}
@@ -166,6 +188,36 @@ public class WILDTimer {
 
 	public void setActivityParent(Activity activityParent) {
 		this.activityParent = activityParent;
+	}
+
+	@Override
+	public void dataPointAdded(SleepDataPoint epoch) {
+		// TODO Auto-generated method stub
+		this.epoch = epoch;
+	}
+
+	@Override
+	public void dataPointUpdated(SleepDataPoint epoch) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void listUpdated(String innerHTML) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void graphUpdated(JSONObject graphData) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dataReset() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

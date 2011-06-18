@@ -1,9 +1,7 @@
-package com.luciddreamingapp.beta.util;
+package com.luciddreamingapp.actigraph;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,25 +18,39 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.luciddreamingapp.beta.GlobalApp;
-import com.luciddreamingapp.beta.InMotionCalibration;
-import com.luciddreamingapp.beta.SimpleFilter;
-import com.luciddreamingapp.beta.actigraph.parcels.ActigraphParcel;
+import com.luciddreamingapp.actigraph.filter.KalmanFilter;
+import com.luciddreamingapp.actigraph.filter.SimpleFilter;
 
 
 public class ActigraphyService extends Service implements SensorEventListener, OnSharedPreferenceChangeListener{
 
 
 
-	private static final String TAG = "Actigraphy Service";
-	private static final boolean D = false;//debug
+	private static final String TAG = "Actigraphy Service Standalong";
+	private static final boolean D = true;//debug
 	public static final int ONGOING_NOTIFICATION = 37;
+	
+	public static final int MAX_CONTRIBUTION = 20;
+	
+	//Static string constants, which I hope are more efficient than re-creating strings each time
+	private static final String s_epoch = "epoch";
+	private static final String s_epochLength = "epochLength";
+	private static final String s_accelerometerEvents = "accelerometerEvents";
+	private static final String s_xActivityCount = "xActivityCount";
+	private static final String s_yActivityCount = "yActivityCount";
+	private static final String s_zActivityCount = "zActivityCount";
+	
+	
+	
+	public final static String START_SERVICE_INTENT = "com.luciddreamingapp.actigraph.START_SERVICE";
+	
 	
 	public static boolean running = false;
 	
@@ -49,7 +61,7 @@ public class ActigraphyService extends Service implements SensorEventListener, O
 	
 	private String accelerometerAccuracy = "";
 	
-	private boolean calibrationCompleted = true;
+	private boolean calibrationCompleted = false;
 	private boolean readyToProcess = false;
 	private boolean timerStarted = false;
 	
@@ -59,11 +71,13 @@ public class ActigraphyService extends Service implements SensorEventListener, O
 	private float x,y,z;
 	private double xPrev,yPrev,zPrev;
 	
+	private double diff;
+	
 	private int xActivityCount,yActivityCount,zActivityCount;
 	
-	private float xSensitivity=  0.00004F;	
-	private float ySensitivity = 0.000006F;
-	private float zSensitivity =0.00001F;
+	private float xSensitivity=  0.0004F;	
+	private float ySensitivity = 0.00006F;
+	private float zSensitivity =0.0001F;
 	private float xStep,yStep,zStep;
 	
 	private SimpleFilter xFilter;
@@ -81,7 +95,7 @@ public class ActigraphyService extends Service implements SensorEventListener, O
 	
 	private boolean stopFlag = false;
 		
-	private GlobalApp parent;
+	
 	public static String NEW_EPOCH = "com.luciddreamingapp.actigraph.NEW_EPOCH";
 	
 	
@@ -117,11 +131,7 @@ public class ActigraphyService extends Service implements SensorEventListener, O
 		 xFilter = new SimpleFilter();
 	      yFilter = new SimpleFilter();
 	      zFilter = new SimpleFilter();
-	      InMotionCalibration.setupFilter(xFilter, xSensitivity, 0);
-	    	//	InMotionCalibration.setupFilter(yFilter, ySensitivity);
-	    		InMotionCalibration.setupFilter(yFilter, ySensitivity, 0);
-	    	//	InMotionCalibration.setupFilter(zFilter, zSensitivity);
-	    		InMotionCalibration.setupFilter(zFilter, zSensitivity, 10);
+
 	    		
 	    		timer = new Timer(true); //daemon timer
 	    		
@@ -256,7 +266,7 @@ private Notification getNotification(){
 		
 	    	startTimer();
 	
-	parent = (GlobalApp)this.getApplication();
+	
    
 		
 	}
@@ -269,8 +279,8 @@ private Notification getNotification(){
 
 	protected void setupDefaultPreferences(SharedPreferences prefs){
 		
-		
-		 calibrationCompleted = prefs.getBoolean("calibration_completed", false);
+		//TODO change to false after testing 
+		 calibrationCompleted = prefs.getBoolean("calibration_completed", true);
 		
 	     
 	}
@@ -284,6 +294,17 @@ private Notification getNotification(){
                 "LucidDreamingAppPreferences", Activity.MODE_PRIVATE);
        //register ourselves as a listener
         mySharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        
+        
+	      KalmanFilter.setupFilter(xFilter, mySharedPreferences.getFloat("xR", xSensitivity), 0);
+	    	//	InMotionCalibration.setupFilter(yFilter, ySensitivity);
+	      KalmanFilter.setupFilter(yFilter, mySharedPreferences.getFloat("yR", ySensitivity), 0);
+	    	//	InMotionCalibration.setupFilter(zFilter, zSensitivity);
+	      KalmanFilter.setupFilter(zFilter, mySharedPreferences.getFloat("zR", zSensitivity), 10);
+        
+	    if(D)Log.e(TAG, "x R: "+mySharedPreferences.getFloat("xR", xSensitivity));
+		if(D)Log.e(TAG, "y R: "+mySharedPreferences.getFloat("yR", ySensitivity));
+		if(D)Log.e(TAG, "z R: "+mySharedPreferences.getFloat("zR", zSensitivity));
         
         xStep=mySharedPreferences.getFloat("xStep", 0.04086106F);
 		yStep=mySharedPreferences.getFloat("yStep", 0.04086106F);
@@ -390,7 +411,9 @@ private Notification getNotification(){
 		// TODO Auto-generated method stub
 		super.onStartCommand(intent, flags, startId);
 		if(D)Log.d(TAG, "ON START COMMAND");
-		return START_STICKY;
+		
+		//prevent service restarts on crash
+		return START_NOT_STICKY;
 	}
 
 	
@@ -422,9 +445,9 @@ private Notification getNotification(){
 			
 			
 			//Get the guess of the true position of the system
-			xFiltered = InMotionCalibration.KalmanFilter(xFilter, x, xNoiseVarianceR);
-			yFiltered = InMotionCalibration.KalmanFilter(yFilter, y, yNoiseVarianceR);
-			zFiltered = InMotionCalibration.KalmanFilter(zFilter, z, zNoiseVarianceR);
+			xFiltered = KalmanFilter.KalmanFilter(xFilter, x, xNoiseVarianceR);
+			yFiltered = KalmanFilter.KalmanFilter(yFilter, y, yNoiseVarianceR);
+			zFiltered = KalmanFilter.KalmanFilter(zFilter, z, zNoiseVarianceR);
 			
 			//create data to show user 
 			//createGraphDataJSON();
@@ -432,39 +455,43 @@ private Notification getNotification(){
 		//	debugLog.appendEntry(getDebugLogEntry());
 			
 			
-			//attempts to compute how far x lies from the filtered value and uses
-			//the rate of change of the difference to estimate the intensity of activity
-			double diff = Math.abs((x-xFiltered)-xPrev)/xStep;
-			if(diff>2){
-				
-				diff-=2;
-				//diff = diff/accelerometerResolution;
-			xActivityCount +=Math.min(Math.floor(diff),20);
-			//xActivityCount +=Math.min(Math.floor(diff*diff),25);
+			xActivityCount +=processValues(x,xFiltered,xPrev,xStep);
+			yActivityCount +=processValues(y,yFiltered,yPrev,yStep);
+			zActivityCount +=processValues(z,zFiltered,zPrev,zStep);
 			
-				}
-			xPrev = x-xFiltered;
-			
-			
-			diff = Math.abs((y-yFiltered)-yPrev)/yStep;
-			if(diff>2){
-				diff-=2;
-				yActivityCount +=Math.min(Math.floor(diff),20);
-				//yActivityCount +=Math.min(Math.floor(diff*diff),25);
-				
-			}
-			yPrev = y-yFiltered;
-			
-			
-			 diff = Math.abs((z-zFiltered)-zPrev)/zStep;
-			 if(diff>3){
-					diff-=3;
-					zActivityCount +=Math.min(Math.floor(diff),20);
-					//zActivityCount +=Math.min(Math.floor(diff*diff),25);
-					
-				}
-			zPrev = z-zFiltered;
-		
+//			//attempts to compute how far x lies from the filtered value and uses
+//			//the rate of change of the difference to estimate the intensity of activity
+//			diff = Math.abs((x-xFiltered)-xPrev)/xStep;
+//			if(diff>2){
+//				
+//				diff-=2;
+//				//diff = diff/accelerometerResolution;
+//			xActivityCount +=Math.min(Math.floor(diff),MAX_CONTRIBUTION);
+//			//xActivityCount +=Math.min(Math.floor(diff*diff),25);
+//			
+//				}
+//			xPrev = x-xFiltered;
+//			
+//			
+//			diff = Math.abs((y-yFiltered)-yPrev)/yStep;
+//			if(diff>2){
+//				diff-=2;
+//				yActivityCount +=Math.min(Math.floor(diff),MAX_CONTRIBUTION);
+//				//yActivityCount +=Math.min(Math.floor(diff*diff),25);
+//				
+//			}
+//			yPrev = y-yFiltered;
+//			
+//			
+//			 diff = Math.abs((z-zFiltered)-zPrev)/zStep;
+//			 if(diff>3){
+//					diff-=3;
+//					zActivityCount +=Math.min(Math.floor(diff),MAX_CONTRIBUTION);
+//					//zActivityCount +=Math.min(Math.floor(diff*diff),25);
+//					
+//				}
+//			zPrev = z-zFiltered;
+//		
 	
 		}
 		//TODO remove after testing. Used to check register/unregister listener
@@ -501,9 +528,8 @@ private Notification getNotification(){
 	
 	class AutoSaveTask extends TimerTask{
 		
-		public void run(){
-		
-				parent.autoSaveData();
+		public void run(){		
+				
 				if(D)Log.e(TAG,"Autosaving graph data");
 		
 				
@@ -518,47 +544,78 @@ private Notification getNotification(){
 		//ensure the main thread does data processing and updates views
 		public void run() {
 			//readyToProcess = true;
+			if(calibrationCompleted){
 			processData();
+			}else{
+				resetEpochVariables();
+			}
 			
 		}
 	}		
 	
 	private void processData(){
+		if(D) Log.e(TAG,"processing data");
 		//creates a skeleton of the sleep data point with only the activity counts, passes it to the parent for future processing
-		SleepDataPoint epoch = new SleepDataPoint();
+//		SleepDataPoint epoch = new SleepDataPoint();
+//		
+//		Calendar temp = Calendar.getInstance();
+//		epoch.setCalendar(temp);
+//		epoch.setSleepEpoch(epochCounter);	
+//		int count = xActivityCount+yActivityCount+zActivityCount;		
+//		epoch.setActivityCount(count);
+//		epoch.setEventCount(accelerometerEventCounter);		
+//		epoch.setXActivityCount(xActivityCount);	
+//		epoch.setYActivityCount(yActivityCount);
+//		epoch.setZActivityCount(zActivityCount);
+//		epoch.setAccelerometerAccuracy(accelerometerAccuracy);
+//		
+//		if(D) Log.e(TAG,"Time: "+temp.getTime().toLocaleString());
+//		if(D) Log.e(TAG,"activity count: "+count);
+//		if(D) Log.e(TAG,"Accelerometer events: "+accelerometerEventCounter);
+//		
+//		parent.processData(epoch);
 		
-		Calendar temp = Calendar.getInstance();
-		epoch.setCalendar(temp);
-		epoch.setSleepEpoch(epochCounter);	
-		int count = xActivityCount+yActivityCount+zActivityCount;		
-		epoch.setActivityCount(count);
-		epoch.setEventCount(accelerometerEventCounter);		
-		epoch.setXActivityCount(xActivityCount);	
-		epoch.setYActivityCount(yActivityCount);
-		epoch.setZActivityCount(zActivityCount);
-		epoch.setAccelerometerAccuracy(accelerometerAccuracy);
-		
-		if(D) Log.e(TAG,"Time: "+temp.getTime().toLocaleString());
-		if(D) Log.e(TAG,"activity count: "+count);
-		if(D) Log.e(TAG,"Accelerometer events: "+accelerometerEventCounter);
-		
-		parent.processData(epoch);
-		epochCounter++;
 		
 		//create an intent and give it a pre-defined name for our intent filter
 		Intent intent = new Intent(NEW_EPOCH);		
-				
-		//create a parcel with data from this epoch, 
-		ActigraphParcel parcel = new ActigraphParcel(epochCounter , epochLength, accelerometerEventCounter,
-				xActivityCount,yActivityCount,zActivityCount);
-		intent.putExtra("epochData", parcel);
 		
-		//broadcast the parcel, hoping someone out there is listening
+		//create a new data bundle
+		Bundle bundle = new Bundle();
+		bundle.putInt(s_epoch, epochCounter);
+		bundle.putInt(s_epochLength, epochLength);
+		bundle.putInt(s_accelerometerEvents,accelerometerEventCounter );
+		bundle.putInt(s_xActivityCount, xActivityCount);
+		bundle.putInt(s_yActivityCount, yActivityCount);
+		bundle.putInt(s_zActivityCount, zActivityCount);
+		bundle.putString("accuracy", accelerometerAccuracy);
+		intent.putExtra("epochData", bundle);
+		
+		//send intent over 
 		ActigraphyService.this.sendBroadcast(intent);
+		
+		//increment event counter
+			epochCounter++;	
+			
+			
+		/*For some reason there's a class loader exception when unmarshalling a parcellable within another application
+		 * it seems to work fine within the same package
+		 * 
+		 */
+		//create a parcel with data from this epoch, 
+//		ActigraphParcel parcel = new ActigraphParcel(epochCounter , epochLength, accelerometerEventCounter,
+//				xActivityCount,yActivityCount,zActivityCount);
+		//intent.putExtra("epochData", parcel);
+		
+		
 		
 		//get ready for a new epoch
 		resetEpochVariables();
 	}
+	
+
+
+	
+	
 	
 	void resetEpochVariables(){
 		xActivityCount=0;
@@ -629,6 +686,15 @@ private Notification getNotification(){
 	        }catch(NullPointerException e){}
 	        timerStarted=false;
 	        running = false;
+	}
+	
+	private double processValues(float value,double valueFiltered, double prevValue, double step){
+		double diff = Math.abs((value-valueFiltered)-prevValue)/step;
+		if(diff>2){			
+			diff-=2;	
+		//xPrev = x-xFiltered;
+		return Math.min(Math.floor(diff),MAX_CONTRIBUTION);
+	}else return 0;
 	}
 	
 	

@@ -136,17 +136,7 @@ $.each(datasets, function(key, val) {
           plot = $.plot($("#placeholder"), data, {
          //       yaxis: { min: 0 },
                 legend: {show:true, container: $("#legend"),noColumns: 9  },
-              	yaxes: [ {show:false, min:12, max:20},//axis1 
-              	//axis 2 is log scale
-              	 { position: "right",max: activityCountYMax,
-              	// transform: function (v) { //need a function to cut off excessive motion
-		          //    	 if(v>1){return 10*Math.log(v)/Math.log(10);} //10 log 10 is dB
-		            //  	 else{ return 0;}
-              	   //},
-              	// inverseTransform: function (v) { return 10^(v/10);}
-              	 },
-              	 {max: sleepScoreYMax},{},//axis 3 and 4  
-              	 {show:false},{show:false}], //5 and 6
+              	yaxis: {show:false, min:12, max:20},
                 xaxis: {min: 0, mode: "time", timeformat: "%H:%M",},
                 grid: {clickable: true},
                 

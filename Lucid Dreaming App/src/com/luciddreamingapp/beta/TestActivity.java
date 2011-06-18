@@ -8,6 +8,7 @@ import java.util.Random;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -191,11 +192,23 @@ private static final int CUSTOM_ALERT = 3;
 	       
 	        	
 	        	case R.id.menu_start_app_help:
+	        		
+	        		
+	        		BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
+	        		
+        		if (mBluetoothAdapter.isEnabled()) {
+        			mBluetoothAdapter.disable();	
+        		}else{
+        			mBluetoothAdapter.enable();
+        		
+        		
+        		}
+	        		
 	        		// intent = new Intent();	        		 
 	        		// intent	 = new Intent("com.luciddreamingapp.uploader.START_UPLOAD");
-	        		 intent = new Intent("com.luciddreamingapp.actigraph.START_SERVICE");
-	        		 sendBroadcast(intent);
-	        		 
+//	        		 intent = new Intent("com.luciddreamingapp.actigraph.START_SERVICE");
+//	        		 sendBroadcast(intent);
+//	        		 
 	        		 return true;
 
 	        	case R.id.menu_load_data_help:

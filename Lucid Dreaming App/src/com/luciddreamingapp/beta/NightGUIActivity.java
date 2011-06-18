@@ -29,8 +29,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -40,7 +38,6 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -57,7 +54,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.luciddreamingapp.beta.util.ActigraphyService;
+import com.luciddreamingapp.actigraph.ActigraphyService;
+import com.luciddreamingapp.actigraph.Calibration;
 import com.luciddreamingapp.beta.util.AudioAnalyzerService;
 import com.luciddreamingapp.beta.util.JSONLoader;
 import com.luciddreamingapp.beta.util.MorseCodeConverter;
@@ -71,7 +69,7 @@ import com.luciddreamingapp.beta.util.state.WILDTimer;
 public class NightGUIActivity extends Activity implements Interactive,OnGesturePerformedListener,OnSharedPreferenceChangeListener {
 
 	//used to enable or disable console messages 
-	private static final boolean D = false;//debug
+	private static final boolean D = true;//debug
 	private static final boolean RTD = false;//real time debug through javascript
 	 private static final String TAG = "Lucid Dreaming GUI";//tag for LogCat and eclipse log
 	 private static final boolean C = true;
@@ -321,7 +319,9 @@ public class NightGUIActivity extends Activity implements Interactive,OnGestureP
 	           	 
 	           	int  accelerometer_calibration_duration_min = prefs.getInt("accelerometer_calibration_duration_min", 7);
             	sendToast(getString(R.string.toast_calibration_duration,accelerometer_calibration_duration_min ));
-            	Intent calibrateAccelerometerIntent = new Intent(this, InMotionCalibration.class);
+            	//Intent calibrateAccelerometerIntent = new Intent(this, InMotionCalibration.class);
+            	Intent calibrateAccelerometerIntent = new Intent(this, Calibration.class);
+            	
             	calibrateAccelerometerIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 calibrateAccelerometerIntent.putExtra("accelerometer_calibration_duration_min", accelerometer_calibration_duration_min);
                 
@@ -338,8 +338,10 @@ public class NightGUIActivity extends Activity implements Interactive,OnGestureP
 	                sleepAnalyzer.getSmartTimer().reset();
 	                startService(new Intent(this, AudioAnalyzerService.class));
 	            	
+	                Intent intent = new Intent("com.luciddreamingapp.actigraph.START_ACTIGRAPHY_SERVICE");
+	                sendBroadcast(intent);
 	                
-	                startService(new Intent(this, ActigraphyService.class));
+	              //  startService(new Intent(this, ActigraphyService.class));
 	                
 	                
 	                
@@ -735,7 +737,13 @@ public class NightGUIActivity extends Activity implements Interactive,OnGestureP
         	        
         	saveData();
         	stopService(new Intent(this, AudioAnalyzerService.class));
-        	stopService(new Intent(this, ActigraphyService.class));
+        	
+        	Intent stopServiceIntent = new Intent(this, ActigraphyService.class);
+			stopServiceIntent.putExtra("stopService", true);			
+			startService(stopServiceIntent);
+        	
+			stopService(new Intent(this, ActigraphyService.class));
+        	
         	dataManager.reset();
         	//stopService(new Intent(this, ActigraphyService.class));
                	

@@ -16,16 +16,27 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.luciddreamingapp.beta.GlobalApp;
 import com.luciddreamingapp.beta.NightGUIActivity;
+import com.luciddreamingapp.beta.util.DataManagerObserver;
 import com.luciddreamingapp.beta.util.JSONLoader;
 import com.luciddreamingapp.beta.util.MorseCodeConverter;
+import com.luciddreamingapp.beta.util.SleepAnalyzer;
+import com.luciddreamingapp.beta.util.SleepDataManager;
+import com.luciddreamingapp.beta.util.SleepDataPoint;
 
-public class SmartTimer {
+public class SmartTimer implements DataManagerObserver {
 	private static final boolean D = true;
 	private static final String TAG = "SmartTimer";
 	
 	private SmartTimerState remConfirmState = new REMConfirmState();
 	private SmartTimerState sleepCycleAdjustState = new SleepCycleAdjustState();
 
+	
+	SleepDataPoint tempEpoch = null;
+	SleepAnalyzer analyzer;
+	SleepDataManager dataManager;
+	
+	//used to filter out repetitive on motion events
+	int	lastReminderPlayedEpoch=0, minimumReminderSpacing=1;
 	
 	private String configFilepath;
 	//private LogManager debugLog;
@@ -45,8 +56,11 @@ public class SmartTimer {
 	
 	private DescriptiveStatistics statSS;//sleep score statistics
 	
-	private boolean remGuess = false;
+	private boolean reminderDelivered = false;
 	private boolean remGuessMade = false;
+	
+	private boolean remGuessStartEnd = false;
+	private boolean remGuessStartEndMade = false;
 	
 	private int shiftDelay = 0;//by how many minutes the SC is shifted from the original start times
 	
@@ -58,8 +72,14 @@ public class SmartTimer {
 	public SmartTimer(String title,String configFilepath){
 		if(D)Log.w(TAG, "Created");
 		
+		analyzer = SleepAnalyzer.getInstance();
+		dataManager = SleepDataManager.getInstance();
 		setupEvents(configFilepath);
-		
+		if(D)
+			for(SleepCycleEventVO vo: list){
+				Log.i(TAG, vo.toString());
+			}
+			
 		//debugLog= new LogManager(LucidDreamingApp.LOG_LOCATION,"smartTimerDebug.txt","epoch,state,event");
 		//debugLog.appendEntry(title);
 		epoch = 0;
@@ -76,10 +96,24 @@ public class SmartTimer {
 	}
 	
 	public boolean guessREM(){
-		if(remGuess){
+		if(reminderDelivered){
 			//this will be called each minute, make sure subsequent calls will not 
 			//get the old value
-			remGuess = false;
+			reminderDelivered = false;
+			return true;
+			
+		}return false;
+	}
+	
+	/** A workaround method to prevent multiple smart timer interaction invocations
+	 * 
+	 * @return
+	 */
+	public boolean guessStartEndREM(){
+		if(remGuessStartEnd){
+			//this will be called each minute, make sure subsequent calls will not 
+			//get the old value
+			remGuessStartEnd = false;
 			return true;
 			
 		}return false;
@@ -113,10 +147,10 @@ public class SmartTimer {
 	
 	private SleepCycleEventVO getListItem(int index){
 		
-		if(list!=null && index>list.size()){
+		if(list!=null && index>=list.size()){
 			return getListItem(list.size()-1);
 		}else{
-			return getListItem(index);
+			return list.get(index);
 		}
 		
 	}
@@ -129,9 +163,12 @@ public class SmartTimer {
 			if(D)Log.w(TAG, "Waiting state: epoch:"+newEpoch +" next start: "+getListItem(SleepCycleEventIndex).startMinute);
 			//simply waits to change the state to the state indicated by the sleepcyclevo
 			if(newEpoch >=getListItem(SleepCycleEventIndex).startMinute){
+				
 				if(parentHandler!=null){parentHandler.post(new remRunnable());}
-				state = getListItem(SleepCycleEventIndex).state;
+				state =remConfirmState;
+				//state = getListItem(SleepCycleEventIndex).state;
 				remStartTime = newEpoch;
+				state.epochChanged(newEpoch);
 				//debugLog.appendEntry(epoch+",Waiting,changing state");
 		//	SleepCycleEventIndex++;
 			}else{
@@ -158,21 +195,24 @@ public class SmartTimer {
 
 		@Override
 		public void epochChanged(int newEpoch) {
-			if(D)Log.w(TAG, "SmartTimer, REMConfrim epoch: "+epoch+" SC: "+SleepCycleEventIndex+" REM Start time: "+remStartTime+" SS Sum: "+sleepScoreSum);
-			if(newEpoch ==remStartTime||newEpoch == remStartTime+1){
-				if(D)Log.w(TAG, "SmartTimer, REMConfrim epoch: "+epoch+" SC: "+SleepCycleEventIndex+" REM Start time: "+remStartTime+" SS Sum: "+sleepScoreSum);
-			}
+			
+		//	if(newEpoch ==remStartTime||newEpoch == remStartTime+1){
+				if(D)Log.w(TAG, "REM CONFIRM epoch: "+newEpoch+" SC: "+SleepCycleEventIndex+" REM Start time: "
+						+remStartTime+" SS Sum: "+sleepScoreSum);
+		//	}
 			
 			
 				
 				switch(getListItem(SleepCycleEventIndex).deliveryMode){
 				case SleepCycleEventVO.REMINDER_DELIVERY_MODE_REM_START:
-					if(!remGuessMade&&getListItem(SleepCycleEventIndex).reminderSet){
+					if(!remGuessStartEndMade&&getListItem(SleepCycleEventIndex).reminderSet){
 						
-						remGuessMade = true;
-						if(D)Log.w(TAG,"calling start interaction at the start of REM: "+ epoch 
-								+"  start: "+getListItem(SleepCycleEventIndex).startMinute+
-								"  duration: "+getListItem(SleepCycleEventIndex).duration);
+						remGuessStartEnd = true;
+						remGuessStartEndMade = true;
+						
+						if(D)Log.e(TAG,"START REM INTERACTION at epoch: "+ newEpoch 
+								+"  SC start: "+getListItem(SleepCycleEventIndex).startMinute+
+								"  SC duration: "+getListItem(SleepCycleEventIndex).duration);
 						startInteraction();
 					}
 					break;
@@ -180,10 +220,10 @@ public class SmartTimer {
 					//if a user wants a reminder for this sleep cycle and no guess has been made yet
 					//make a guess before leaving the cycle
 				case SleepCycleEventVO.REMINDER_DELIVERY_MODE_REM_END:
-					if(newEpoch >=remStartTime+getListItem(SleepCycleEventIndex).duration){
-						remGuess = true;
-						remGuessMade = true;
-						if(D)Log.w(TAG,"calling start interaction at the end of REM: "+ epoch 
+					if(!remGuessStartEndMade && newEpoch >=remStartTime+getListItem(SleepCycleEventIndex).duration){
+						remGuessStartEnd = true;
+						remGuessStartEndMade = true;
+						if(D)Log.e(TAG,"END REM INTERACTION at epoch: "+ newEpoch 
 								+"  start: "+getListItem(SleepCycleEventIndex).startMinute+
 								"  duration: "+getListItem(SleepCycleEventIndex).duration);
 						startInteraction();//TODO add sleep analyzer filter for spacing
@@ -194,8 +234,15 @@ public class SmartTimer {
 				case SleepCycleEventVO.REMINDER_DELIVERY_MODE_MOVEMENT:
 					break;
 				}
+				//change state at the last minute of the duration
+//				if(newEpoch >=remStartTime+((getListItem(SleepCycleEventIndex).duration>0)?
+//							getListItem(SleepCycleEventIndex).duration-1:
+//							getListItem(SleepCycleEventIndex).duration)){
+					
+				if(D)Log.w(TAG,"REM START: "+remStartTime);
+				if(D)Log.w(TAG,"REM DURATION: "+getListItem(SleepCycleEventIndex).duration);
 				
-				if(newEpoch >=remStartTime+getListItem(SleepCycleEventIndex).duration){
+					if(newEpoch >=remStartTime+getListItem(SleepCycleEventIndex).duration){
 					state = sleepCycleAdjustState;
 					if(parentHandler!=null){parentHandler.post(new nonREMRunnable());}
 					adjustTime=newEpoch;
@@ -203,7 +250,13 @@ public class SmartTimer {
 					statSS.clear();
 					sleepScoreCheckPoints=1;
 					SleepCycleEventIndex++;
-					if(D)Log.w(TAG,"SS: "+SleepCycleEventIndex+" start: "+ getListItem(SleepCycleEventIndex).startMinute+" "+getListItem(SleepCycleEventIndex).duration);
+					remGuessStartEndMade = false;
+					remGuessStartEnd = false;
+					
+					//notify the next state of this minute
+					//epochChanged(epoch);
+					
+					//if(D)Log.e(TAG,"ADVANCING SC to index: "+SleepCycleEventIndex+" start: "+ getListItem(SleepCycleEventIndex).startMinute+" "+getListItem(SleepCycleEventIndex).duration);
 					//debugLog.appendEntry(epoch+",REM Confirm,changing state to Adjust state: "+SleepCycleEventIndex);
 				}
 			
@@ -229,6 +282,12 @@ public class SmartTimer {
 				statSS.clear();
 				sleepScoreCheckPoints=1;
 				SleepCycleEventIndex++;
+				remGuessStartEndMade = false;
+				remGuessStartEnd = false;
+				
+				//notify the next state of this minute
+				//epochChanged(epoch);
+				
 				if(D)Log.w(TAG,"SS: "+SleepCycleEventIndex+" start: "+ getListItem(SleepCycleEventIndex).startMinute+" "+getListItem(SleepCycleEventIndex).duration);
 				//debugLog.appendEntry(epoch+",REM Confirm,User event after duration/2, finishing REM ");
 			}
@@ -245,7 +304,13 @@ public class SmartTimer {
 					sleepScoreSum+=sleepScore;
 					//if sleep score increases by more than the 
 					if(sleepScoreSum>sleepScoreThreshold*sleepScoreCheckPoints &&getListItem(SleepCycleEventIndex).reminderSet){
-						remGuess=true;
+						
+						if((tempEpoch.getSleepEpoch()-(lastReminderPlayedEpoch+minimumReminderSpacing))>=0)
+						{
+							startInteraction();
+						}
+						
+						reminderDelivered=true;
 						remGuessMade = true;
 						
 						if(D)Log.w(TAG,"SleepCycleCheckpoint reached "+sleepScoreCheckPoints);
@@ -327,21 +392,29 @@ public class SmartTimer {
 			int delay = getListItem(SleepCycleEventIndex).startMinute -
 			(getListItem(SleepCycleEventIndex-1).startMinute +
 					getListItem(SleepCycleEventIndex-1).duration);
+			
+			if(D)Log.w(TAG,"EPOCH:"+newEpoch);		
+			if(D)Log.w(TAG,"DELAY:"+delay);
+			if(D)Log.w(TAG,"ADJUST:"+adjustTime);
 
-
-			if(D)Log.w(TAG,"Epoch: "+newEpoch+" expectedREM at: "+(adjustTime+delay)+" SS Sum: "+sleepScoreSum+" SS last 12 sum: "+statSS.getSum());
+			if(D)Log.e(TAG,"SC ADJUST: "+newEpoch+" expectedREM at: "+(adjustTime+delay)+" SS Sum: "+sleepScoreSum+" SS last 12 sum: "+statSS.getSum());
 			//reduce spam
 //			if(newEpoch ==adjustTime||newEpoch==adjustTime+1){
 //			if(D)Log.w(TAG,"Epoch: "+newEpoch+" expectedREM at: "+(adjustTime+delay));
 //			}
 			
 			if(newEpoch >=adjustTime+delay+shiftDelay){
-				state = getListItem(SleepCycleEventIndex).state; 
+				state = remConfirmState;
+				//state = getListItem(SleepCycleEventIndex).state; 
 				if(parentHandler!=null){parentHandler.post(new remRunnable());}
 				remGuessMade = false;
+				remGuessStartEndMade = false;
 				sleepScoreSum = 0;
 				remStartTime = newEpoch;
-				if(D){Log.w(TAG,epoch+",SleepCycle Adjust,Changing state to REMConfirm");
+				
+				//state.epochChanged(epoch);
+				
+				if(D){Log.e(TAG,epoch+",CHANGING STATE to REM Confirm at: "+epoch);
 				//debugLog.appendEntry(epoch+",SleepCycle Adjust,Changing state to REMConfirm");
 				}
 			}
@@ -376,8 +449,13 @@ public class SmartTimer {
 				if(parentHandler!=null){parentHandler.post(new remRunnable());}
 				remStartTime = epoch;
 				remGuessMade = false;
+				remGuessStartEndMade = false;
 				sleepScoreSum = 0;
-				if(D)Log.w(TAG,epoch+",SleepCycle Adjust,Fast forwarding to next REM cycle");
+				
+				//notify the next state of this minute
+				//epochChanged(epoch);
+				
+				if(D)Log.w(TAG,epoch+",CHANGING STATE to REM Confirm due to movement at : "+epoch);
 				//debugLog.appendEntry(epoch+",SleepCycle Adjust,Fast forwarding to next REM cycle");
 			}else{
 				//do nothing for 0.5 to 0.75
@@ -406,6 +484,7 @@ public class SmartTimer {
 				//state = remConfirmState;//advances to the next state
 				if(parentHandler!=null){	parentHandler.post(new remRunnable());}
 				remGuessMade = false;
+				remGuessStartEndMade = false;
 				remStartTime = epoch;
 				sleepScoreSum = 0;
 				statSS.clear();
@@ -465,10 +544,7 @@ public class SmartTimer {
 		
 		JSONObject temp = new JSONObject();
 		
-		
-		
-		SleepCycleEventVO prev = null;
-		
+				
 		for(SleepCycleEventVO vo :list){
 			//	if(D)Log.w(TAG,"Smart Timer VO start: "+vo.startMinute+" duration "+vo.duration);
 				
@@ -504,30 +580,47 @@ public class SmartTimer {
 				//add fuzzy logic events 
 				
 				
-					switch(vo.deliveryMode){
-					
-					case SleepCycleEventVO.REMINDER_DELIVERY_MODE_REM_START:
-						//add markers at the beginning
-						addVOEvents(vo,temp, vo.startMinute);
-						break;
-					case SleepCycleEventVO.REMINDER_DELIVERY_MODE_REM_END:
-						//add markers at the end
-						addVOEvents(vo,temp, vo.startMinute+vo.duration);
-						break;
-					case SleepCycleEventVO.REMINDER_DELIVERY_MODE_MOVEMENT:
-						//add markers in the middle
-						addVOEvents(vo,temp, vo.startMinute+vo.duration/2);
-						break;
-						default:
-							break;
-					
-					}//end delivery mode
 					
 					//todo potentially add reminder text and filepahts to a separate array at the same indices as the markers for
 					//these events. Then using on click event for the marker the user would be able to see the corresponding reminder
 					
 				
 			}
+		
+		//fixing a crazy scary gui bug with reminders showing up at randome events, >separate loop
+		for(int i = 0;i<list.size();i++){
+			SleepCycleEventVO vo=list.get(i);
+			if(D){
+				Log.i(TAG,"voStart: "+vo.startMinute);
+				Log.i(TAG,"voDuration: "+vo.duration);
+				Log.i(TAG,"voDuration: "+vo.deliveryMode);
+			}
+			
+			//add dummy data points to prevent NASTY flot plotting bug!
+			try{temp.accumulate("voiceReminder", (new Tuple (0, 19)));}catch(JSONException e){} ;
+			try{temp.accumulate("vibrateReminder", (new Tuple (0, 18)));}catch(JSONException e){} ;
+			try{temp.accumulate("strobeReminder", (new Tuple (0, 17)));}catch(JSONException e){} ;
+			
+				switch(vo.deliveryMode){
+				
+				case SleepCycleEventVO.REMINDER_DELIVERY_MODE_REM_START:
+					//add markers at the beginning
+					addVOEvents(vo,temp, vo.startMinute);
+					break;
+				case SleepCycleEventVO.REMINDER_DELIVERY_MODE_REM_END:
+					//add markers at the end
+					addVOEvents(vo,temp, vo.startMinute+vo.duration);
+					break;
+				case SleepCycleEventVO.REMINDER_DELIVERY_MODE_MOVEMENT:
+					//add markers in the middle
+					addVOEvents(vo,temp, vo.startMinute+vo.duration/2);
+					break;
+					default:
+						break;
+				
+				}//end delivery mode
+		}
+		
 		
 		for (int i = 0; i <list.size();i++){
 			SleepCycleEventVO voCurrent,voNext;
@@ -595,18 +688,39 @@ public class SmartTimer {
 	
 	
 	private void addVOEvents(SleepCycleEventVO vo, JSONObject temp, int minute){
+		
+		if(D){
+			Log.i(TAG,"Minute: "+minute);
+			
+		}
+		
+		if(vo.reminderSet){
 		//if the reminder is set, filepath is not null, and the file at filepath exists
-		if (vo.useVoiceReminder && vo.reminderFilepath!=null && (new File(vo.reminderFilepath)).exists()){ 
+		if (vo.useVoiceReminder && vo.reminderFilepath!=null ){ 
+			if(D)Log.i(TAG,"adding voice event");
 			try{temp.accumulate("voiceReminder", (new Tuple (minute, 19)));}catch(JSONException e){} ;}
 		
 		//if use vibrate reminder, and the string is present, and the vibration time is greater than 0
-		if (vo.useVibrateReminder &&vo.vibrateMessage!=null && !vo.vibrateMessage.equals("") &&vo.vibrateDotDuration>0){ 
+		if (vo.useVibrateReminder &&vo.vibrateMessage!=null && !vo.vibrateMessage.equals("") &&vo.vibrateDotDuration>0){
+			if(D)Log.i(TAG,"adding vibrate event");
 			try{temp.accumulate("vibrateReminder", (new Tuple (minute, 18)));}catch(JSONException e){} ;}
 		
 		//if use strobe, strobe text is present and strobe time is >0
-		if (vo.useStrobe &&vo.flashMessage!=null && !vo.flashMessage.equals("")&&vo.flashDotDuration>0){ 
+		if (vo.useStrobe &&vo.flashMessage!=null && !vo.flashMessage.equals("")&&vo.flashDotDuration>0){
+			if(D)Log.i(TAG,"adding flash event");
 			try{temp.accumulate("strobeReminder", (new Tuple (minute, 17)));}catch(JSONException e){} ;}
+		}
 		
+		if(D){
+			try{
+			Log.e(TAG,"light : "+temp.getJSONArray("voiceReminder").toString());
+			Log.e(TAG,"vibrate : "+temp.getJSONArray("vibrateReminder").toString());
+			Log.e(TAG,"strobe : "+temp.getJSONArray("strobeReminder").toString());
+			
+			}catch(JSONException e){
+				if(D)e.printStackTrace();
+			}
+		}
 	}
 	
 	/**
@@ -706,7 +820,10 @@ public class SmartTimer {
 		
 		SleepCycleEventVO vo =null;
 		try{
-		vo = getListItem(SleepCycleEventIndex);
+			//smart timer will know about this one minute later. By then the state would change!
+			
+				vo = getListItem(SleepCycleEventIndex);
+			
 		}catch(Exception e){if(D)e.printStackTrace();return;}
 		
 		if(D){
@@ -717,10 +834,7 @@ public class SmartTimer {
 			Log.w(TAG,"vo use strobe: "+vo.useStrobe);
 		}
 		
-		if(globalApp!=null){
-			parent = globalApp.getGuiActivity();
-			//parentHandler = globalApp.getGuiActivity().getHandler();
-		}
+		
 		
 		if(vo==null|| globalApp==null || !vo.reminderSet){return;}
 		
@@ -728,7 +842,7 @@ public class SmartTimer {
 			if(D)Log.w(TAG,"starting voice Interaction "+vo.reminderFilepath);
 			 globalApp.voiceInteractAsync(vo.reminderFilepath);
 			//parentHandler.post(new VoiceReminder(vo.reminderFilepath));
-			 remGuess = true;//predict REM at the beginning of the rem event
+			 reminderDelivered = true;//predict REM at the beginning of the rem event
 		}
 		if(vo.useVibrateReminder && vo.vibrateMessage!=null&& !vo.vibrateMessage.equals("")){
 			
@@ -738,20 +852,30 @@ public class SmartTimer {
 			   if(vo.vibrateDotDuration>1)temp =vo.vibrateDotDuration; 
 			   if(D)Log.w(TAG,"starting vibrate Interaction: "+temp+" vibrate message"+vo.vibrateMessage );
 			globalApp.vibrateInteractAsync(MorseCodeConverter.pattern(vo.vibrateMessage, temp));
-			remGuess = true;//predict REM at the beginning of the rem event
+			reminderDelivered = true;//predict REM at the beginning of the rem event
 		}
 		if(vo.useStrobe &&vo.flashMessage!=null &&!vo.flashMessage.equals("")){
 			long temp = 10;
 			   if(vo.flashDotDuration>1)temp =vo.flashDotDuration; 
 			   if(D)Log.w(TAG,"starting strobe Interaction: "+temp+" strobe message"+vo.flashMessage );
 			globalApp.strobeInteractAsync(MorseCodeConverter.pattern(vo.flashMessage, temp));
-			remGuess = true;//predict REM at the beginning of the rem event
+			reminderDelivered = true;//predict REM at the beginning of the rem event
+		}
+		
+		if(reminderDelivered)
+		{
+			tempEpoch.setReminderPlayed(true);
+			
+			lastReminderPlayedEpoch = tempEpoch.getSleepEpoch();
+		
+			int temp = dataManager.getStatistics().getNumberOfVoiceReminders();
+			dataManager.getStatistics().setNumberOfVoiceReminders(temp+1);
 		}
 		
 	}
 	
 	public void setupEvents(String filepath){
-	
+	if(D)Log.i(TAG,"Setting up events from: "+filepath);
 		//pull up the config file and initialize objects from GSON
 		//classes do not seem to be saved, so assign the state manually
 		 try{
@@ -769,7 +893,7 @@ public class SmartTimer {
 						SleepCycleEventVO vo =gson.fromJson(eventObjects.getString(i), SleepCycleEventVO.class) ;
 						vo.state = remConfirmState;
 						array[i]=vo;
-						if(D)Log.w(TAG, "Smart Timer VO: "+vo.toString());
+						//if(D)Log.w(TAG, "Smart Timer VO: "+vo.toString());
 						
 					}catch(Exception e){}
 				}
@@ -777,6 +901,10 @@ public class SmartTimer {
 				Arrays.sort(array, new ListEventComparator());
 				for(int i = 0;i<array.length;i++){
 					list.add(array[i]);
+				}
+				
+				for(SleepCycleEventVO vo :list){
+					if(D)Log.v(TAG,vo.toString());
 				}
 				 }catch(Exception e){
 					 if(D)e.printStackTrace();
@@ -793,7 +921,7 @@ public class SmartTimer {
 	
 	public void reset(){
 		this.SleepCycleEventIndex=0;
-		remGuess = false;
+		reminderDelivered = false;
 		remGuessMade = false;
 		 adjustTime = 0;//a reference point indicating when the state changed to adjustState. Makes it easier to make decisions
 		 remStartTime = 0;
@@ -804,6 +932,47 @@ public class SmartTimer {
 		shiftDelay=0;
 		epoch = 0;
 	}
+
+	@Override
+	public void dataPointAdded(SleepDataPoint epoch) {
+		// TODO Auto-generated method stub
+		
+		if(D)Log.e(TAG, "dataPointAdded called");
+		//respond to new events and epoch changes
+		epochChanged(epoch.getSleepEpoch());
+		if(epoch.getUserEvent()!=epoch.NO_EVENT){
+			userEvent();
+		}
+		
+		tempEpoch= epoch;
+	}
+
+	@Override
+	public void dataPointUpdated(SleepDataPoint epoch) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void listUpdated(String innerHTML) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void graphUpdated(JSONObject graphData) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dataReset() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
+	
 	
 	
 }

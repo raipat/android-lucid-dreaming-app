@@ -195,67 +195,7 @@ public class AutomaticUploaderService extends Service {
 		}
 	}
 	
-	/**
-	 * Uploads a temp file using the name of the file provided
-	 * @param f
-	 * @param filename
-	 */
-	private void tempFileUpload(File f, String filename){
-		//upload and check the result, reformat the name
-		uploader.openConnection();
-		//ftpUpload(f,processName(f));
-		String result = uploader.upload(f, processName(filename));
-		if(D)Log.e(TAG,"Result: "+result);
-		if(result!=null && result.equals(OK)){
-			if(D)Log.e(TAG,"Uploaded: "+filename);
-			//remember this upload
-			config.getFilenames().add(filename);
-		}else{
-								
-			if(D)Log.e(TAG,"did not upload: "+filename);
-		}
-		
-		uploader.closeConnection();
-	}
-	
-	private void fileUpload(File f){
-		//upload and check the result, reformat the name
-		uploader.openConnection();
-		//ftpUpload(f,processName(f));
-		String result = uploader.upload(f, processName(f));
-		if(D)Log.e(TAG,"Result: "+result);
-		if(result!=null && result.equals(OK)){
-			if(D)Log.e(TAG,"Uploaded: "+f.getName());
-			//remember this upload
-			config.getFilenames().add(f.getName());
-		}else{
-								
-			if(D)Log.e(TAG,"did not upload: "+f.getName());
-		}
-		
-		uploader.closeConnection();
-	}
-	
-	private void stringUpload (String s, File f){
-		//upload and check the result, reformat the name
-		uploader.openConnection();
-		//ftpUpload(f,processName(f));
-		String result = uploader.upload(s, processName(f));
-		if(D)Log.e(TAG,"Result: "+result);
-		if(result!=null && result.equals(OK)){
-			if(D)Log.e(TAG,"Uploaded: "+f.getName());
-			//remember this upload
-			config.getFilenames().add(f.getName());
-		}else{
-								
-			if(D)Log.e(TAG,"did not upload: "+f.getName());
-		}
-		
-		uploader.closeConnection();
-	}
-	
-	
-	
+
 	/**Ensures that this is a graph file
 	 * 
 	 * @return
@@ -268,10 +208,13 @@ public class AutomaticUploaderService extends Service {
 		 * determines proper parsing method
 		 * passes the file data to parser
 		 */
+		if(D)Log.i(TAG,"verify file");
+		if(D)Log.i(TAG,f.getName()+" contains: "+config.getFilenames().contains(f.getName()));
+		if(D)Log.i(TAG,"length: "+f.length()/1024);
 		
 		if(f.length()/1024>graphSize
 				&&!config.getFilenames().contains(f.getName())){
-		
+			if(D)Log.i(TAG,"inside verify");
 			
 			JSONObject temp = null;
 			try {
@@ -304,6 +247,7 @@ public class AutomaticUploaderService extends Service {
 				version = temp.getInt("version");
 				
 			} catch (JSONException e) {
+				if(D)Log.i(TAG,"calling process JSON");
 				processJSON(temp,f);
 				//process all format
 				
@@ -312,9 +256,11 @@ public class AutomaticUploaderService extends Service {
 			}
 			
 			if(version ==2){
+				processJSON(temp,f);
 				//process new format
 				return true;
 			}else{
+				if(D)Log.i(TAG,"calling process JSON");
 				processJSON(temp,f);
 				//process old format
 				return true;

@@ -91,7 +91,7 @@ public class SleepAnalyzer {
 			
 			
 			if(epoch>=0){
-			smartTimer.epochChanged(epoch);
+			//smartTimer.epochChanged(epoch);
 			dataManager.logEpoch(dataManager.getSleepDataPoint(epoch));
 			}
 			
@@ -99,7 +99,7 @@ public class SleepAnalyzer {
 			
 			
 		}else{
-			
+			if(D) Log.e(TAG, "Processing epoch: "+epoch);
 			if(!sleepScoringStarted){
 				sleepScoringStarted=true;
 				
@@ -229,19 +229,21 @@ public class SleepAnalyzer {
 		
 		if(enableREMPrediction){
 		//TODO make permanent or remove after testing
-		smartTimer.updateSleepScore(a0.coleSleepScore);
-		smartTimer.updateUserAsleep(a0.coleAsleep);
+//		smartTimer.updateSleepScore(a0.coleSleepScore);
+//		smartTimer.updateUserAsleep(a0.coleAsleep);
+//		
+//		//if on movement and adequate spacing or at the end or start of the event
+//		if((smartTimer.guessREM()&&a0.sleepEpoch-(lastReminderPlayedEpoch+minimumReminderSpacing)>=0)
+//				||(smartTimer.guessStartEndREM())
+//				){
+//			lastReminderPlayedEpoch = a0.sleepEpoch;
+//			a0.reminderPlayed =true;
+//			int temp = dataManager.getStatistics().getNumberOfVoiceReminders();
+//			dataManager.getStatistics().setNumberOfVoiceReminders(temp+1);
+//			smartTimer.startInteraction();
+//		}
 		
-		//take into account reminder spacing
-		if(smartTimer.guessREM()&&a0.sleepEpoch-(lastReminderPlayedEpoch+minimumReminderSpacing)>=0){
-			lastReminderPlayedEpoch = a0.sleepEpoch;
-			a0.reminderPlayed =true;
-			int temp = dataManager.getStatistics().getNumberOfVoiceReminders();
-			dataManager.getStatistics().setNumberOfVoiceReminders(temp+1);
-			smartTimer.startInteraction();
-		}
-		
-		smartTimer.epochChanged(epoch);
+//		smartTimer.epochChanged(a0.sleepEpoch);
 		}else{
 		
 		//predict the future. If the activity count is large enough to cause an awakening

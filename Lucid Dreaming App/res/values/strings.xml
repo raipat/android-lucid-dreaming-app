@@ -165,8 +165,8 @@
      <!-- REM Prediction Activity Threshold preference -->
 	<string name="pref_rem_prediction_activity_threshold_title">REM prediction activity threshold</string>
 	<string name="pref_rem_prediction_activity_threshold_summary">Sum of sleep scores during REM periods that will trigger a reminder (if Smart Timer reminder on movement is selected). Lower numbers will result in reminders closer to the start of expected REM period. Large numbers may never  trigger a reminder</string>
-     <string name="pref_rem_prediction_activity_threshold_dialog_text">The app will play the reminder (one minute apart)</string>
-    <string name="pref_rem_prediction_activity_threshold_units_text"> times</string>
+     <string name="pref_rem_prediction_activity_threshold_dialog_text">Sum of sleep score to trigger reminder</string>
+    <string name="pref_rem_prediction_activity_threshold_units_text"> units</string>
     
      
       <!-- End of REM Prediction preferences -->

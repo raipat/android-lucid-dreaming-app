@@ -14,8 +14,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -32,13 +34,14 @@ import android.widget.Toast;
 
 import com.luciddreamingapp.beta.util.AutomaticUploaderService;
 import com.luciddreamingapp.beta.util.gesturebuilder.GestureBuilderActivity;
+import com.luciddreamingapp.beta.util.state.SmartTimerActivity;
 
 
 
 
 public class LucidDreamingApp extends Activity {
 	 private static final String TAG = "LucidDreamingApp";
-	 private static final boolean D = false;
+	 private static final boolean D = true;
 	 
 	 
 	 
@@ -58,7 +61,7 @@ public class LucidDreamingApp extends Activity {
 
 	WebView listView;
 	WebView graphView;
-	private ImageButton startButton;
+	private ImageButton startButton,infoButton,configButton;
 	ImageButton viewDataButton;    
     
     private boolean appStarted = false;
@@ -78,6 +81,8 @@ public class LucidDreamingApp extends Activity {
          setContentView(R.layout.main_menu);
          
          startButton = (ImageButton)findViewById(R.id.start_button); 
+         infoButton =  (ImageButton)findViewById(R.id.info_button); ;
+         configButton =  (ImageButton)findViewById(R.id.config_button); ;
          
          SharedPreferences prefs = PreferenceManager
          .getDefaultSharedPreferences(getBaseContext());
@@ -298,33 +303,44 @@ public class LucidDreamingApp extends Activity {
        
     
 
-	@Override
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if(D) {System.out.println("onActivityResult " + resultCode);}
-//        switch (requestCode) {
-//        case REQUEST_SELECT_FILE:
-//        	if(resultCode==Activity.RESULT_OK){
-//        		//get the filepath returned by the file selector and re-initialize the state
-//        		String dataFilepath=data.getExtras().getString("filepath");
-//        		File dataFile = new File(dataFilepath);
-//        		
-//        		
-//        		JSONDataHandler handler = new JSONDataHandler();
-//        		try{handler.setJson1(JSONLoader.getData(dataFile));
-//        		  graphView.addJavascriptInterface(handler, "javahandler");
-//               // graphView.loadUrl("file:///android_asset/html/basic_plot_from_handler.html");
-//                graphView.loadUrl("file:///android_asset/html/show_data_from_file.html");
-//        		
-//        		}catch(IOException e){
-//        			sendToast(e.getMessage());
-//        		}
-//        		
-//        	}else if(resultCode ==Activity.RESULT_CANCELED){
-//        		sendToast("File selection cancelled");
-//        	}
-//        	break;
-//        }	
+       // if(D) {System.out.println("onActivityResult " + resultCode);}
+      	
+        switch(requestCode){
+        case Preferences.REQUEST_SELECT_SMART_TIMER_CONFIG_FILE:
+       	 if(resultCode==Activity.RESULT_OK){
+    		 //get the config file and save its path
+    		 String configFilepath=data.getExtras().getString("filepath");
+        		 File f = new File(configFilepath);
+     			Toast.makeText(getBaseContext(),
+           "Selected: "+configFilepath,
+           Toast.LENGTH_LONG).show();
+     			
+     			 SharedPreferences customSharedPreference = getSharedPreferences(
+                         "LucidDreamingAppPreferences", Context.MODE_PRIVATE);
+    			      SharedPreferences.Editor editor = customSharedPreference
+    			                      .edit();
+    			      editor.putString("configFilepath",
+    			     		 f.getAbsolutePath());
+    			   editor.commit();
+
+    		
+    			   
+              	Intent smartTimerIntent = new Intent(getBaseContext(), SmartTimerActivity.class);
+              	smartTimerIntent.putExtra("eventType", SmartTimerActivity.REM_EVENT);
+              	
+              	smartTimerIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      			startActivity( smartTimerIntent);
+    			      
+     			
+     			
+    	 }
+        	break;
+        	
         }
+        
+    }
     
     
     @Override
@@ -358,31 +374,59 @@ public class LucidDreamingApp extends Activity {
             
         case R.id.menu_share_data:
         	
+        	//get intent to start the uploader
+        final Intent uploaderIntent =getPackageManager().getLaunchIntentForPackage("com.luciddreamingapp.uploader");
+        	
         	AlertDialog.Builder builder = new AlertDialog.Builder(this);
         	//getString(R.string.dialog_math_puzzle)
-        	//pull out
-	    	builder.setMessage("Anonymously contribute sleep data to science?")
-	 	       .setCancelable(true)
-	 	       .setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-	 	           public void onClick(DialogInterface dialog, int id) {
-	 	        	  
-	 	        	  
-	 	        	Intent startUploader = new Intent(LucidDreamingApp.this,AutomaticUploaderService.class);
-	 	        	startUploader.putExtra("automatic", false);
-	 	        	startService(startUploader);	
-	 	        	  
-	 	           }
-	 	       })	 	       
-	 	       .setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+        	//TODO pull out the text
+	    	   
+        	 builder.setCancelable(true);
+        	
+        	if(uploaderIntent ==null){
+        		//get from market
+        	builder.setMessage("To contribute data to science, you need a small data uploader app from market. Get it from market now?");
+      	 	           		
+        		
+        		
+  	 	       builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+  	 	    	
+  	 	           public void onClick(DialogInterface dialog, int id) {
+  	 	        
+  	 	        	final Intent intent = new Intent(Intent.ACTION_VIEW);
+  	 	        	intent.setData(Uri.parse("market://details?id=com.luciddreamingapp.uploader"));
+  	 	        	startActivity(intent);
+  	 	        	  
+  	 	           }
+  	 	       });
+        		
+        	}else{
+        		builder.setMessage("Anonymously contribute sleep data to science?");
+        		  builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+        	 	    	
+     	 	           public void onClick(DialogInterface dialog, int id) {
+     	 	        	   Intent intent = new Intent(LucidDreamingApp.this,AutomaticUploaderService.class);
+     	 	        	   intent.putExtra("automatic", false);
+     	 	        	startService(intent);
+     	 	        	
+//     	 	        	 Intent intent = new Intent("com.luciddreamingapp.uploader.START_UPLOAD");
+//     	 	        	 sendBroadcast(intent);
+     	 	           }
+     	 	       });
+        	}
+        	
+        	    
+	 	      builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 	 	           public void onClick(DialogInterface dialog, int id) {
 	 	        	  dialog.cancel();
 	 	           }
 	 	       });
-	    	
-	    	
-	    	//builder.setView(layout);
-	    	AlertDialog alertDialog = builder.create();
-	    	alertDialog.show();
+		    	
+		    	//builder.setView(layout);
+		    	AlertDialog alertDialog = builder.create();
+		    	alertDialog.show();
+        	
+
         	
         	return true;
 
@@ -450,6 +494,80 @@ public class LucidDreamingApp extends Activity {
             });
        			
  
+       
+       //defines the listener as a parameter passed to the method
+       infoButton.setOnClickListener(new OnClickListener() {
+            @Override
+			public void onClick(View v) {
+            	
+            	Intent intent = new Intent(LucidDreamingApp.this,QuickstartActivity.class);
+            	startActivity(intent);
+
+             }
+            });
+       			
+       
+       //defines the listener as a parameter passed to the method
+       configButton.setOnClickListener(new OnClickListener() {
+            @Override
+			public void onClick(View v) {
+             	AlertDialog.Builder builder = new AlertDialog.Builder(LucidDreamingApp.this);
+            	//getString(R.string.dialog_math_puzzle)
+            	//TODO pull out the text
+    	    	   
+            	 builder.setCancelable(true);
+            	
+            	builder.setMessage("Would you like to apply easy config settings?\n" +
+            			"Enable Reminders, gestures and Smart Timer\n" +            			
+            			"Screen Brightness: 1%\n" +
+            			"Open and edit Smart Timer config"
+            			);
+            	builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+            	 	    	
+         	 	           public void onClick(DialogInterface dialog, int id) {
+         	 	        
+         	 	        	sendShortToast("config positive");
+         	 	        SharedPreferences prefs;
+         	 	    
+         	 	      	
+         	 	        	prefs = PreferenceManager
+         	 	          .getDefaultSharedPreferences(getBaseContext());
+         	 	        	
+         	 	        	Editor editor = prefs.edit();
+         	 	        	
+         	 	        	//enable sound
+         	 	        	editor.putBoolean("play_sound_pref", true);
+         	 	        	editor.putBoolean("enable_smart_timer", true);
+         	 	        	editor.putBoolean("enable_gestures", true);
+         	 	        	editor.putBoolean("enable_screen_brightness_adjustment", true);
+         	 	        	editor.putInt("brightness_level", 1);
+         	 	      	editor.commit();
+         	 	  	
+         	 	     Intent selectFileIntent = new Intent(getBaseContext(), DataFileSelector.class);
+         			 selectFileIntent.putExtra("filepath", LucidDreamingApp.APP_HOME_FOLDER);
+         			 //match smart followed or preceeded by anything with an extension of txt or txt.gzip
+         			 selectFileIntent.putExtra("filterString","(.)*?[Ss]mart(.)*(txt)([.]gzip)??");
+         			 startActivityForResult(selectFileIntent, Preferences.REQUEST_SELECT_SMART_TIMER_CONFIG_FILE);
+         		           
+         	 	        	  
+         	 	           }
+         	 	       });
+            	
+            	
+            	    
+    	 	      builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+    	 	           public void onClick(DialogInterface dialog, int id) {
+    	 	        	  dialog.cancel();
+    	 	           }
+    	 	       });
+    		    	
+    		    	//builder.setView(layout);
+    		    	AlertDialog alertDialog = builder.create();
+    		    	alertDialog.show();
+            	           	
+             }
+            });
+       			
        
        
        
@@ -672,7 +790,7 @@ public class LucidDreamingApp extends Activity {
     	
     	try{
     		File homeDir = new File(Environment.getExternalStorageDirectory(),APP_HOME_FOLDER);
-    		File configFile = new File(homeDir+"/SmartTimerConfig.txt.gzip");
+    		File configFile = new File(homeDir+"/BlankSmartTimerConfig.txt.gzip");
     		//copy the config file if it does not exist
     		if(!configFile.exists()){
     		copyFileTo(configFile,
@@ -687,7 +805,7 @@ public class LucidDreamingApp extends Activity {
     	
     	try{
     		File homeDir = new File(Environment.getExternalStorageDirectory(),APP_HOME_FOLDER);
-    		File configFile = new File(homeDir+"/AltSmartTimerConfig.txt.gzip");
+    		File configFile = new File(homeDir+"/SmartTimerConfig.txt.gzip");
     		//copy the config file if it does not exist
     		if(!configFile.exists()){
     		copyFileTo(configFile,
