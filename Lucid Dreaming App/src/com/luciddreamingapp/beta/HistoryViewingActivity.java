@@ -988,14 +988,14 @@ public class HistoryViewingActivity extends Activity implements OnMultiChoiceCli
 				}catch(Exception e){if(D)e.printStackTrace();}
 			
 			
-			
+				try{
 			
 			long averageWakeUpTime = (long)statWakingUp.getMean();	
 			
 			Date sleepEnd = getDateInTimeZone(new Date(averageWakeUpTime),"UTC");
 			if(D) System.out.println(sleepEnd.toString());
 			
-			try{
+		
 				json.put("averageWakingUpTime", formatter.format(sleepEnd));
 				}catch(Exception e){if(D)e.printStackTrace();}
 			

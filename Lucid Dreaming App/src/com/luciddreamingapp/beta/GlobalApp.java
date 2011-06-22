@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.luciddreamingapp.actigraph.ActigraphyService;
 import com.luciddreamingapp.beta.actigraph.parcels.ActigraphReceiver;
+import com.luciddreamingapp.beta.util.AutomaticUploaderService;
 import com.luciddreamingapp.beta.util.JSONLoader;
 import com.luciddreamingapp.beta.util.MorseCodeConverter;
 import com.luciddreamingapp.beta.util.SleepAnalyzer;
@@ -393,49 +394,49 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 	  *  
 	  */
 	  public void braceletVibrate(){
-		  try{
-		  
-		handler.post(new Runnable(){
-			
-			
-			public void run(){
-				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
-				if (mBluetoothAdapter.isEnabled()) {
-					mBluetoothAdapter.disable();	
-					
-					handler.postDelayed(new Runnable(){
-						
-						
-						public void run(){
-							 if(D)Log.w(TAG, "Resuming bluetooth");
-							BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
-							if (mBluetoothAdapter.isEnabled()) {
-								mBluetoothAdapter.disable();	
-							
-								
-							}else{
-								//in case there's an error enabling the adapter
-								mBluetoothAdapter.enable();
-							
-							
-							}
-						}
-						
-					},10000)	;
-					
-				}else{
-					//in case there's an error enabling the adapter
-					mBluetoothAdapter.enable();
-				
-				
-				}
-			}
-			
-		})	;
-  	
-		  }catch(Exception e){
-			  if(D)e.printStackTrace();
-		  }
+//		  try{
+//		  
+//		handler.post(new Runnable(){
+//			
+//			
+//			public void run(){
+//				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
+//				if (mBluetoothAdapter.isEnabled()) {
+//					mBluetoothAdapter.disable();	
+//					
+//					handler.postDelayed(new Runnable(){
+//						
+//						
+//						public void run(){
+//							 if(D)Log.w(TAG, "Resuming bluetooth");
+//							BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
+//							if (mBluetoothAdapter.isEnabled()) {
+//								mBluetoothAdapter.disable();	
+//							
+//								
+//							}else{
+//								//in case there's an error enabling the adapter
+//								mBluetoothAdapter.enable();
+//							
+//							
+//							}
+//						}
+//						
+//					},10000)	;
+//					
+//				}else{
+//					//in case there's an error enabling the adapter
+//					mBluetoothAdapter.enable();
+//				
+//				
+//				}
+//			}
+//			
+//		})	;
+//  	
+//		  }catch(Exception e){
+//			  if(D)e.printStackTrace();
+//		  }
 	  }
 	  
 	  
@@ -751,6 +752,11 @@ public class GlobalApp extends Application implements OnSharedPreferenceChangeLi
 		   handler.post(new ToastRunnable(message));
 	    	
 	    }
+	   
+	   
+	   
+	   
+	
 	
 
 	   

@@ -41,7 +41,7 @@ import com.luciddreamingapp.beta.util.analysis.AnalysisTester;
 public class AutomaticUploaderService extends Service {
 	
 	//debug
-	private static final boolean D = true;
+	private static final boolean D = false;
 	private static final String TAG = "Lucid Dreaming App Science Uploader";
 	
 	private static final String OK = "OK";//ok result from the server

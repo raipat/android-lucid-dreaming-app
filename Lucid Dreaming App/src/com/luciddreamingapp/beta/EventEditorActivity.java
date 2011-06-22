@@ -31,7 +31,7 @@ import com.luciddreamingapp.beta.util.state.WILDEventVO;
 
 public class EventEditorActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String TAG = "EventEditor";
-	public static final boolean D = true;
+	public static final boolean D = false;
 
 	public static final int START_TIME_DIALOG_ID =1;
 	public static final int DURATION_TIME_DIALOG_ID =2;

@@ -8,8 +8,7 @@
      <uses-permission android:name="android.permission.WRITE_SETTINGS" />
      <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
      <uses-permission android:name="android.permission.VIBRATE" />
-     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-      <uses-permission android:name="android.permission.BLUETOOTH" />
+
       
      
        <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -104,6 +103,11 @@ instead, we register the receiver programmatically in the GlobalApp
         <activity
         android:name=".EventEditorActivity"
         android:label="Event Editor"
+       ></activity>
+       
+           <activity
+        android:name=".MiniPreferenceActivity"
+        android:label="Preferences"
        ></activity>
        
        	<activity

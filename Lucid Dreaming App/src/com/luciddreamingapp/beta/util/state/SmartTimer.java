@@ -24,7 +24,7 @@ import com.luciddreamingapp.beta.util.SleepDataManager;
 import com.luciddreamingapp.beta.util.SleepDataPoint;
 
 public class SmartTimer implements DataManagerObserver {
-	private static final boolean D = true;
+	private static final boolean D = false;
 	private static final String TAG = "SmartTimer";
 	
 	private SmartTimerState remConfirmState = new REMConfirmState();
@@ -389,9 +389,12 @@ public class SmartTimer implements DataManagerObserver {
 			
 			//find out how long to wait after the previos REM cycle
 			//int delay = getListItem(SleepCycleEventIndex-1).nextEventDelayMinute;
-			int delay = getListItem(SleepCycleEventIndex).startMinute -
+			int delay =0;
+			if(SleepCycleEventIndex>0){
+				delay =  getListItem(SleepCycleEventIndex).startMinute -
 			(getListItem(SleepCycleEventIndex-1).startMinute +
 					getListItem(SleepCycleEventIndex-1).duration);
+			}
 			
 			if(D)Log.w(TAG,"EPOCH:"+newEpoch);		
 			if(D)Log.w(TAG,"DELAY:"+delay);

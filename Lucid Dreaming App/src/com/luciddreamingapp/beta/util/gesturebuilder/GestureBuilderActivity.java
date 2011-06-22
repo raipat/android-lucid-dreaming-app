@@ -248,9 +248,13 @@ out:        for (String name : entries) {
     @Override
     protected void onPrepareDialog(int id, Dialog dialog) {
         super.onPrepareDialog(id, dialog);
+       try{
         if (id == DIALOG_RENAME_GESTURE) {
             mInput.setText(mCurrentRenameGesture.name);
         }
+       }catch(Exception e){
+    	   if(D)e.printStackTrace();
+       }
     }
 
     private Dialog createRenameDialog() {

@@ -6,10 +6,7 @@
 			android:key="play_sound_pref" android:title="@string/pref_play_sound_reminders"
 			android:summary="@string/pref_play_sound_reminders_summary" />
 			
-			
-			<CheckBoxPreference android:defaultValue="true"
-			android:key="play_sound_pref" android:title="@string/pref_allow_data_upload_title"
-			android:summary="@string/pref_allow_data_upload_summary" />
+		
 			
 			<PreferenceScreen android:key="remPredictionPrefs"
 			android:title="@string/rem_prediction_screen_title"

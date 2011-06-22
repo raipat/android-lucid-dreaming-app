@@ -16,7 +16,7 @@ public class ActigraphReceiver extends BroadcastReceiver  {
 
 	
 	private static final String TAG = "Actigraph Receiver";
-	private static final boolean D = true;
+	private static final boolean D = false;
 	
 	//Static string constants, which I hope are more efficient than re-creating strings each time
 	private static final String s_epoch = "epoch";

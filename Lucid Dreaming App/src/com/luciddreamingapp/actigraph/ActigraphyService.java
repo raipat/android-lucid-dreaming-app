@@ -34,7 +34,7 @@ public class ActigraphyService extends Service implements SensorEventListener, O
 
 
 	private static final String TAG = "Actigraphy Service Standalong";
-	private static final boolean D = true;//debug
+	private static final boolean D = false;//debug
 	public static final int ONGOING_NOTIFICATION = 37;
 	
 	public static final int MAX_CONTRIBUTION = 20;
@@ -636,8 +636,8 @@ private Notification getNotification(){
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		// TODO Auto-generated method stub
-		
-		String message = null;
+		try{
+		String message = "";
 		switch (accuracy){
 			case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:
 				//if(D) Log.w(TAG,sensor.getName()+ message);
@@ -660,6 +660,9 @@ private Notification getNotification(){
 		if(!accelerometerAccuracy.equals(message)){
 			accelerometerAccuracy= message;
 			if(D) Log.w(TAG,sensor.getName()+ message);
+		}
+		}catch(Exception e){
+			if(D)e.printStackTrace();
 		}
 		//	
 	}

@@ -69,7 +69,7 @@ import com.luciddreamingapp.beta.util.state.WILDTimer;
 public class NightGUIActivity extends Activity implements Interactive,OnGesturePerformedListener,OnSharedPreferenceChangeListener {
 
 	//used to enable or disable console messages 
-	private static final boolean D = true;//debug
+	private static final boolean D = false;//debug
 	private static final boolean RTD = false;//real time debug through javascript
 	 private static final String TAG = "Lucid Dreaming GUI";//tag for LogCat and eclipse log
 	 private static final boolean C = true;

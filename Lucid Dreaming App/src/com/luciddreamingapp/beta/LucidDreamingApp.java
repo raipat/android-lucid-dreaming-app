@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,6 +19,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -41,7 +43,7 @@ import com.luciddreamingapp.beta.util.state.SmartTimerActivity;
 
 public class LucidDreamingApp extends Activity {
 	 private static final String TAG = "LucidDreamingApp";
-	 private static final boolean D = true;
+	 private static final boolean D = false;
 	 
 	 
 	 
@@ -80,7 +82,7 @@ public class LucidDreamingApp extends Activity {
          
          setContentView(R.layout.main_menu);
          
-         startButton = (ImageButton)findViewById(R.id.start_button); 
+//         startButton = (ImageButton)findViewById(R.id.start_button); 
          infoButton =  (ImageButton)findViewById(R.id.info_button); ;
          configButton =  (ImageButton)findViewById(R.id.config_button); ;
          
@@ -100,7 +102,12 @@ public class LucidDreamingApp extends Activity {
          
          establishDirectories();
          
-
+	        Intent uploaderIntent =getPackageManager().getLaunchIntentForPackage("com.luciddreamingapp.uploader");
+	        if(uploaderIntent!=null &&prefs.getBoolean("connectionAvailable",false)){
+	        	startUploadingTask();
+	        }
+         
+       
     }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -349,7 +356,7 @@ public class LucidDreamingApp extends Activity {
 
         
         case R.id.menu_start_app:
-        	sendShortToast(getString(R.string.toast_starting_app));
+        	//sendShortToast(getString(R.string.toast_starting_app));
          	  Intent monitorAccelerometerIntent = new Intent(appContext, NightGUIActivity.class);
          	 monitorAccelerometerIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
          	       
@@ -451,11 +458,11 @@ public class LucidDreamingApp extends Activity {
         case R.id.menu_help:
         	//TODO move back to help before next release
         	
-//        	Intent helpIntent = new Intent(getBaseContext(),
-//                    HelpActivity.class);
-        	
         	Intent helpIntent = new Intent(getBaseContext(),
-                    TestActivity.class);
+                    HelpActivity.class);
+        	
+//        	Intent helpIntent = new Intent(getBaseContext(),
+//                    TestActivity.class);
         		startActivity(helpIntent);
         		return true;
         	
@@ -478,20 +485,20 @@ public class LucidDreamingApp extends Activity {
     private void initializeButtons(){
 	      
         //defines the listener as a parameter passed to the method
-       startButton.setOnClickListener(new OnClickListener() {
-            @Override
-			public void onClick(View v) {
-            	 //establish the plotting view
-    	   
-            	
-            	sendShortToast(getString(R.string.toast_starting_app));
-         	  Intent monitorAccelerometerIntent = new Intent(appContext, NightGUIActivity.class);
-         	   monitorAccelerometerIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); 
-         	
-               startActivity(monitorAccelerometerIntent);
-            	
-             }
-            });
+//       startButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//			public void onClick(View v) {
+//            	 //establish the plotting view
+//    	   
+//            	
+//            	sendShortToast(getString(R.string.toast_starting_app));
+//         	  Intent monitorAccelerometerIntent = new Intent(appContext, NightGUIActivity.class);
+//         	   monitorAccelerometerIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); 
+//         	
+//               startActivity(monitorAccelerometerIntent);
+//            	
+//             }
+//            });
        			
  
        
@@ -988,6 +995,64 @@ public class LucidDreamingApp extends Activity {
    
    
    
-    
+   private void startUploadingTask(){
+	   try{
+	   new AutomaticUploadTask().execute(null);
+	   }catch(Exception e){
+		   if(D) e.printStackTrace();
+	   }
+   }
+	 
+	 private class AutomaticUploadTask extends AsyncTask<long[], Void, Void> {
+	     protected Void doInBackground(long[]... urls) {
+	        if(D)Log.e(TAG, "Automatic uploader running");
+	        try{
+	        	
+	        	//if uploader is not installed, do nothing
+
+	        	
+	        	
+	        SharedPreferences   prefs = PreferenceManager
+	        .getDefaultSharedPreferences(getBaseContext());
+	        
+	        Editor editor = prefs.edit();
+	        int weekDay =  Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+	        editor.putInt("uploadDay", weekDay);
+	        editor.putBoolean("connectionAvailable", false);
+	        editor.commit();
+	       if(D)Log.e(TAG, "Automatic uploader running, weekday to upload: "+(prefs.getInt("uploadDay", (int)(Math.random()*7+1)))+" today: "+weekDay);
+	       //if there's an internet connection, today is the upload day and the 
+	       //user consented to data upload, try automatic upload
+	       if(
+	    		  // ((GlobalApp)getApplication()).getConnectionStatus()
+	    		   weekDay ==  (prefs.getInt("uploadDay", (int)(Math.random()*7+1)))
+	    		  && prefs.getBoolean("data_upload_pref", true)
+	    		 ){
+	    	   		Intent intent = new Intent(LucidDreamingApp.this,AutomaticUploaderService.class);
+			 	   intent.putExtra("automatic", true); 
+			 	   
+			 	  //catches activity not found exceptions
+			 	   try {
+					startService(intent);
+				} catch (Exception e) {
+					
+					if(D)e.printStackTrace();
+				}
+			 	 
+	    		 }
+	    		 
+	        }catch(Exception e){
+	        	if(D)e.printStackTrace();
+	        }
+	         return null;
+	     }
+
+	     protected void onPostExecute() {
+	    		sendShortToast("Automatic Upload completed");
+	     }
+	 }
+
+	   
+	   
 }
 
