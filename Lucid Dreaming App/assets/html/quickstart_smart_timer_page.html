@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Sensor Calibration</title>
+    <link href="layout.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+   
+ </head>
+    <body>
+ 
+ <h1>SmartTimer configuration</h1>
+Smart Timer is a self adjusting timer, it<a title="How Smart Timer Works" href="http://luciddreamingapp.com/help-how-to/smart-timer-works/"> checks user gestures and movement to adjust itself</a>
+ </br> To help you with configuration, I added 2 Smart Timer files - the one that I use and a blank one. Just use one of them as a template
+ </br>Smart timer uses times after going to bed, so event afte 2:00 will take place 2 hours after going to bed. If you go to bed at 1AM, it will take place at 3AM, etc
+<ul>
+	<li>The built-in timer is properly configured and requires minor adjustments</li>
+	<li>The timer has a set of REM events - when you are likely to be dreaming. A reminder will be played during that time interval.</li>
+	<li><a title="Configure Smart Timer" href="http://luciddreamingapp.com/help-how-to/configure-smart-timer/">Add or edit the REM events present in SmartTimerConfig.txt.gzip</a> by clicking the change config button below</li>
+	<li>Assign reminders to REM events. They show as colored Xs on the graph below</li>
+	<li>Deactivate events when you would like no reminders to be played.</li>
+</ul>
+
+
+To adjust the sensitivity of Smart Timer to movement, click the Smart Timer Preferences button and change the REM Prediction activity threshold. Lower values cause the reminder to be played closer to the REM event start, while higher values may never get played.
+	
+Below is the chart of the currently selected Smart Timer config
+<ul>
+	
+	<li>Green lines indicate active events - these will play reminders. Gray lines are not active and will not play anything</li>
+	<li>Activate/deactivate events rather than delete them</li>
+	<li>An X is shown above an event if a reminder is properly configured for that event</li>
+	<li>Reminders above beginning/end of a line will be played at start/end</li>
+	<li>Reminders above the middle of the line will be played on movement</li>
+</ul>
+Please note that Xs at 0 are for display purposes only and the <strong>graph below updates only when config is saved!</strong>
+
+ </body>
+</html>

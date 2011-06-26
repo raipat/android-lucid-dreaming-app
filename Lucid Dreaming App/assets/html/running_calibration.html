@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Actigraph Calibration Activity</title>
+    <link href="layout.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../jquery.min.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.min.js"></script>
+ </head>
+    <body>
+     
+	
+    <div id="xPlot" style="width:1000px;height:300px;"></div>
+     <p><span id="messageX"></span></p>	   
+	
+	<div id="yPlot" style="width:1000px;height:300px;"></div>
+ 	<p><span id="messageY"></span></p>
+	
+	 <div id="zPlot" style="width:1000px;height:300px;"></div>    
+	 <p><span id="messageZ"></span></p>	
+
+  
+<script type="text/javascript">
+$(function () {
+//no more modifications while we are updating
+window.javahandler.graphUpdated(false);
+
+//get the json data from java
+var temp = window.javahandler.getPrevGraphData();
+var json = eval("(" + temp + ")");
+
+//plot the data
+plotX();
+plotY();
+plotZ();
+
+setXMessage();
+setYMessage();
+setZMessage();
+//can update again
+window.javahandler.graphUpdated(true);
+
+
+
+
+
+function plotX() { $.plot($("#xPlot"), [{label: json.xLabel, data: json.xData},{label: "xFilteredLowR", data:
+json.xFilteredLowR},{label: "xFilteredHighR", data: json.xFilteredHighR}, {label: json.xFilteredLabel, data:
+json.xFiltered, color: "#003399"}], { }); }
+
+	
+	
+
+
+
+function plotY() { $.plot($("#yPlot"),[{label: json.yLabel, data: json.yData},{label: "yFilteredLowR", data:
+json.yFilteredLowR},{label: "yFilteredHighR", data: json.yFilteredHighR}, {label: json.yFilteredLabel, data:
+json.yFiltered, color: "#003399"}], { }); }
+
+
+
+
+function plotZ() { $.plot($("#zPlot"), [{label: json.zLabel, data: json.zData},{label: "zFilteredLowR", data:
+json.zFilteredLowR},{label: "zFilteredHighR", data: json.zFilteredHighR}, {label: json.zFilteredLabel, data:
+json.zFiltered, color: "#003399"}], { }); }
+
+
+function graphData(gdata){
+json = eval("(" + gdata + ")");
+plotX();
+plotY();
+plotZ();
+}
+
+function startCalibration(){
+ var temp =  window.javahandler.getPrevGraphData();
+ graphData(temp);
+
+	//window.javahandler.startCalibration();
+	}
+	
+	
+	
+	function setXMessage(){
+	$("#messageX").text(json.messageX);
+	}
+	
+		function setYMessage(){
+	$("#messageY").text(json.messageY);
+	}
+	
+		function setZMessage(){
+	$("#messageZ").text(json.messageZ);
+	}
+	
+function setText2(text2){
+document.getElementById('message').innerHTML = "\""+text+"\"";
+}
+	
+	
+	  
+	  function setText(text){
+	document.getElementById('message').innerHTML = text;
+	}
+	  
+	
+});//end of function
+</script>
+ 
+...
+ </body>
+</html>

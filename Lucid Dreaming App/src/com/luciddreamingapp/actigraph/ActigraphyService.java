@@ -34,7 +34,7 @@ public class ActigraphyService extends Service implements SensorEventListener, O
 
 
 	private static final String TAG = "Actigraphy Service Standalong";
-	private static final boolean D = false;//debug
+	private static final boolean D = true;//debug
 	public static final int ONGOING_NOTIFICATION = 37;
 	
 	public static final int MAX_CONTRIBUTION = 20;
@@ -410,7 +410,7 @@ private Notification getNotification(){
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// TODO Auto-generated method stub
 		super.onStartCommand(intent, flags, startId);
-		if(D)Log.d(TAG, "ON START COMMAND");
+		if(D)Log.e(TAG, "ON START COMMAND");
 		
 		//prevent service restarts on crash
 		return START_NOT_STICKY;

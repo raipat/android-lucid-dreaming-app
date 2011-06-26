@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  
+  	<CheckBoxPreference 
+			
+			android:key="enable_smart_timer"
+			
+			android:defaultValue="true"			
+			android:title="@string/pref_enable_smart_timer_title"
+			android:summary="@string/pref_enable_smart_timer_summary" />
+			
+			<Preference
+			android:title="@string/pref_switch_smart_timer_config_title"
+			android:summary="@string/pref_switch_smart_timer_config_summary"
+			
+			android:key="switch_smart_timer_config"
+			android:defaultValue=""
+			 />
+			
+			
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_minimum_reminder_spacing_title"
+			android:summary="@string/pref_minimum_reminder_spacing_summary"
+			android:dialogMessage="@string/pref_minimum_reminder_spacing_dialog_text"
+			android:text="@string/pref_minimum_reminder_spacing_units_text"
+			
+			android:key="minimum_reminder_spacing"
+			android:max="45" 
+			android:defaultValue="15"
+		 />
+			
+			<com.luciddreamingapp.beta.util.SeekBarPreference
+			android:title="@string/pref_rem_prediction_activity_threshold_title"
+			android:summary="@string/pref_rem_prediction_activity_threshold_summary"
+			android:dialogMessage="@string/pref_rem_prediction_activity_threshold_dialog_text"
+			android:text="@string/pref_rem_prediction_activity_threshold_units_text"
+					
+			android:key="rem_prediction_activity_threshold"
+				
+			android:max="50" 
+			android:defaultValue="8"
+			 />
+</PreferenceScreen>

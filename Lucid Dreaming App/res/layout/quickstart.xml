@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2008 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+ <ScrollView
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/listView"
+android:fadingEdge="none"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent">
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"   
+    android:orientation="vertical">
+
+   
+         <LinearLayout
+     android:id="@+id/buttonBar0"
+        style="@android:style/ButtonBar"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/startApp"
+            android:onClick="startApp"
+              android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Start App Right Now" />
+            
+    </LinearLayout>
+         
+
+
+	<WebView android:id="@+id/extra_app_view"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            />
+
+   <LinearLayout
+     android:id="@+id/buttonBar"
+        style="@android:style/ButtonBar"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/getDataUploader"
+            android:onClick="getDataUploader"
+              android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Get Data Uploader" />
+            
+            <Button
+            android:id="@+id/getSoundRecorder"
+            android:onClick="getSoundRecorder"
+            android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Get Sound Recorder" />
+            
+             <Button
+            android:id="@+id/getFileManager"
+            android:onClick="getFileManager"
+            android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Get File Manager" />
+            
+    </LinearLayout>
+    
+   <WebView android:id="@+id/calibrate_view"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            />
+            
+               <LinearLayout
+     android:id="@+id/buttonBar2"
+        style="@android:style/ButtonBar"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/startCalibration"
+            android:onClick="startCalibration"
+              android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Start Calibration" />
+            
+    </LinearLayout>
+            
+            
+              <WebView android:id="@+id/gather_data_view"
+            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            />
+           
+           
+            <LinearLayout
+     android:id="@+id/buttonBar3"
+        style="@android:style/ButtonBar"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/disableReminders"
+            android:onClick="disableReminders"
+              android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Disable Reminders \n Enable Gestures" />
+            
+            <Button
+            android:id="@+id/showGestures"
+            android:onClick="showGestures"
+            android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Show Gestures" />
+            
+             <Button
+            android:id="@+id/viewData"
+            android:onClick="viewData"
+            android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="View Data" />
+            
+    </LinearLayout>
+           
+           <WebView android:id="@+id/sleep_cycle_view"
+             android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            />  
+            
+     <LinearLayout
+     android:id="@+id/buttonBar4"
+        style="@android:style/ButtonBar"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/viewHistory"
+            android:onClick="viewHistory"
+              android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="View History" />
+            
+    </LinearLayout>
+         
+         <WebView android:id="@+id/wild_timer_view"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            />
+         
+            <WebView android:id="@+id/smart_timer_view"
+             android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            />  
+         
+            <WebView android:id="@+id/change_config_view"
+             android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            />  
+            
+         
+           <LinearLayout
+     android:id="@+id/buttonBar5"
+        style="@android:style/ButtonBar"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/changeConfig"
+            android:onClick="changeConfig"
+              android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Change Config" />
+            
+                <Button
+            android:id="@+id/smartTimerPreferences"
+            android:onClick="smartTimerPreferences"
+              android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Smart Timer Preferences" />
+            
+    </LinearLayout>
+         
+         
+         <LinearLayout
+     android:id="@+id/buttonBar6"
+        style="@android:style/ButtonBar"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/advancedOptions"
+            android:onClick="advancedOptions"
+              android:gravity="top"
+
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:enabled="true"
+            android:text="Advanced Options" />
+            
+    </LinearLayout>
+         
+     
+
+</LinearLayout>
+</ScrollView>

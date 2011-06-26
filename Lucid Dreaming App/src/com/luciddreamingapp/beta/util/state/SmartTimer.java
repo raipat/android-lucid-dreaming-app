@@ -146,13 +146,18 @@ public class SmartTimer implements DataManagerObserver {
 	
 	
 	private SleepCycleEventVO getListItem(int index){
-		
+		try{
 		if(list!=null && index>=list.size()){
 			return getListItem(list.size()-1);
 		}else{
 			return list.get(index);
 		}
-		
+		}catch(Exception e){
+			SleepCycleEventVO temp =  new SleepCycleEventVO();
+			temp.duration = 0;
+			temp.startMinute = 0;
+			return temp;
+		}
 	}
 	
 	

@@ -13,13 +13,14 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.luciddreamingapp.actigraph.ActigraphyService;
 import com.luciddreamingapp.beta.GlobalApp;
 import com.luciddreamingapp.beta.util.audio.SimpleAudioAnalyser;
 
 public class AudioAnalyzerService extends Service {
 
 	private static final String TAG = "Audio Analyzer";
-	private static final boolean D = false;//debug
+	private static final boolean D = true;//debug
 	 private SleepDataManager dataManager;
 	public static final int NOTIFICATION_ID = 81;
 	public static boolean running = false;
@@ -92,9 +93,11 @@ public class AudioAnalyzerService extends Service {
 		// TODO Auto-generated method stub
 		super.onStart(intent, startId);
 		
+		if(D)Log.e(TAG, "Received intent");
 		try {
 			if(intent.getExtras()!=null){
 				if(intent.getExtras().getBoolean("stopService")){
+					stopForeground(true);
 					this.stopSelf();
 				}
 			}
@@ -118,22 +121,34 @@ public class AudioAnalyzerService extends Service {
 		}
 	}
 	
-	
-
 	private Notification getNotification(){
-		Notification notification = new Notification(android.R.drawable.stat_sys_warning
-				, "Starting noise monitoring",  System.currentTimeMillis());
+		Notification notification = new Notification(android.R.drawable.stat_notify_error
+				, "Starting actigraphy data collection",  System.currentTimeMillis());
 						Intent notificationIntent = new Intent(this, AudioAnalyzerService.class);
 						notificationIntent.putExtra("stopService", true);
 						PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
 						notification.setLatestEventInfo(this, "Lucid Dreaming App Audio Analyzer",
-						       "Monitors microphone for noise levels. No audio is recorded. Touch to stop.", pendingIntent);
+								"Monitors microphone for noise levels. No audio is recorded. Touch to stop.", pendingIntent);
 						return notification;
 						
 //						05-15 13:29:27.353: INFO/ActivityManager(152): Starting activity: Intent { act=android.intent.action.MAIN cmp=com.android.settings/.RunningServices }
 
 	}
-		
+//
+//	private Notification getNotification(){
+//		Notification notification = new Notification(android.R.drawable.stat_sys_warning
+//				, "Starting noise monitoring",  System.currentTimeMillis());
+//						Intent notificationIntent = new Intent(this, AudioAnalyzerService.class);
+//						notificationIntent.putExtra("stopService", true);
+//						PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
+//						notification.setLatestEventInfo(this, "Lucid Dreaming App Audio Analyzer",
+//						       "Monitors microphone for noise levels. No audio is recorded. Touch to stop.", pendingIntent);
+//						return notification;
+//						
+////						05-15 13:29:27.353: INFO/ActivityManager(152): Starting activity: Intent { act=android.intent.action.MAIN cmp=com.android.settings/.RunningServices }
+//
+//	}
+//		
 		
 		   private static final Class[] mStartForegroundSignature = new Class[] {
 		        int.class, Notification.class};

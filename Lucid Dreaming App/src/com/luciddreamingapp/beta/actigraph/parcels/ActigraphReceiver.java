@@ -48,7 +48,7 @@ public class ActigraphReceiver extends BroadcastReceiver  {
 		
 		
 		if(intent.getExtras()!=null){
-			
+			try{
 			Bundle b =	intent.getBundleExtra("epochData");
 			SleepDataPoint dataPoint = new SleepDataPoint();
 			
@@ -69,7 +69,9 @@ public class ActigraphReceiver extends BroadcastReceiver  {
 		if(D)Log.v(TAG,"sleep epoch: "+dataPoint.getSleepEpoch());
 		if(D)Log.v(TAG,"event count: "+dataPoint.getEventCount());
 		if(D)Log.v(TAG,"activity count: "+dataPoint.getActivityCount());
-		
+			}catch(Exception e){
+				
+			}
 		}
 	
 	}
